@@ -13,9 +13,11 @@ bool testcase(const std::string& schema, const std::string& data)
   if (!result)
   {
     std::cerr << "Failure trying to validate this data:" << std::endl;
-    std::cerr << schema << std::endl;
-    std::cerr << "against this schema:" << std::endl;
     std::cerr << data << std::endl;
+    std::cerr << "against this schema:" << std::endl;
+    std::cerr << schema << std::endl;
+    std::cerr << "The following reasons were given:" << std::endl;
+    validator.printErrors(std::cerr);
   }
   return result;
 }
@@ -27,7 +29,16 @@ int main()
   success = success && testcase(
     "uuid:             \n"
     "  type: integer   \n"
-    "  min: 1000       \n",
+    "  default: 1042   \n"
+    ,
+    ""
+  );
+
+  success = success && testcase(
+    "uuid:             \n"
+    "  type: integer   \n"
+    "  required: true  \n"
+    ,
     "uuid: 1042"
   );
 

@@ -25,22 +25,33 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] forbidden
   * [ ] items
   * [ ] keysrules
-  * [ ] meta
+  * [x] meta
   * [ ] min, max
   * [ ] minlenght, maxlength
   * [ ] oneof
   * [ ] readonly
   * [ ] regex
   * [ ] require_all
-  * [ ] required
+  * [x] required
   * [ ] schema (dict)
   * [ ] schema (list)
   * [ ] type
+    *  [x] integer
+    *  [x] float
+    *  [x] string
+    *  [x] boolean
+    *  [ ] number
+    *  [ ] binary
+    *  [ ] date
+    *  [ ] datetime
+    *  [ ] dict
+    *  [ ] list
+    *  [ ] set
   * [ ] valuesrules
 * Normalization Rules
   * [ ] Renaming
   * [ ] Purging
-  * [ ] Default Values
+  * [x] Default Values
   * [ ] Value Coercion
 * [ ] Error Handling
 * Customization
