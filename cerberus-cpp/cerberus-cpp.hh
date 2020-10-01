@@ -29,12 +29,15 @@ namespace Cerberus {
       , state(*this)
     {
       registerRule(
-        "meta",
+        YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
       );
 
       registerRule(
-        "type",
+        YAML::Load(
+          "type: \n"
+          "  type: string"
+        ),
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
           if(data.IsNull())
@@ -52,7 +55,10 @@ namespace Cerberus {
       );
 
       registerRule(
-        "required",
+        YAML::Load(
+          "required:\n"
+          "  type: boolean"
+        ),
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
           if((schema.as<bool>()) && (data.IsNull()))
@@ -62,7 +68,7 @@ namespace Cerberus {
 
       // Normalization rules
       registerNormalizationRule(
-        "default",
+        YAML::Load("default: {}"),
         [](ValidationState&, const YAML::Node& schema, const YAML::Node& data, YAML::Node& vdata)
         {
           if(data.IsNull())
@@ -82,28 +88,23 @@ namespace Cerberus {
     {
       typesmapping[name] = [](const YAML::Node& node)
       {
-        try
-        {
-          node.as<T>();
-          return true;
-        }
-        catch (...)
-        {
-          return false;
-        }
+        T val;
+        return YAML::convert<T>::decode(node, val);
       };
     }
 
     template<typename Rule>
-    void registerRule(const std::string& name, Rule&& rule)
+    void registerRule(const YAML::Node& schema, Rule&& rule)
     {
-      rulemapping[name] = std::forward<Rule>(rule);
+      schema_schema[schema.begin()->first] = schema.begin()->second;
+      rulemapping[schema.begin()->first.as<std::string>()] = std::forward<Rule>(rule);
     }
 
     template<typename Rule>
-    void registerNormalizationRule(const std::string& name, Rule&& rule)
+    void registerNormalizationRule(const YAML::Node& schema, Rule&& rule)
     {
-      normalizationmapping[name] = std::forward<Rule>(rule);
+      schema_schema[schema.begin()->first] = schema.begin()->second;
+      normalizationmapping[schema.begin()->first.as<std::string>()] = std::forward<Rule>(rule);
     }
 
     bool validate(const YAML::Node& data)
@@ -113,10 +114,19 @@ namespace Cerberus {
 
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
+      // Validate the given schema
+      state.errors.clear();
+      state.document = schema;
+      state.validate(state.normalize(schema, schema_schema), schema_schema);
+      if (!state.errors.empty())
+      {
+        state.printErrors(std::cerr);
+        throw std::exception{};
+      }
+
       state.errors.clear();
       state.document = data;
-      YAML::Node normalized = state.normalize(data, schema);
-      state.validate(data, schema);
+      state.validate(state.normalize(data, schema), schema);
       return state.errors.empty();
     }
 
@@ -235,6 +245,10 @@ namespace Cerberus {
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&)>> rulemapping;
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&, YAML::Node&)>> normalizationmapping;
     std::map<std::string, std::function<bool(const YAML::Node&)>> typesmapping;
+
+    // The schema that is used to validate user provided schemas.
+    // This is update with snippets as rules are registered
+    YAML::Node schema_schema;
   };
 
 } // namespace Cerberus
