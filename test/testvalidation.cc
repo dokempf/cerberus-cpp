@@ -4,43 +4,20 @@
 #include<iostream>
 
 
-bool testcase(const std::string& schema, const std::string& data)
+int main(int argc, char** argv)
 {
-  Cerberus::Validator validator(YAML::Load(schema));
-  bool result = validator.validate(YAML::Load(data));
+  auto input = YAML::LoadFile(argv[1]);
+  Cerberus::Validator validator(input["schema"]);
+  auto result validator.validate(input["data"]) ? 0 : 1;
 
-  // TODO: Compare against Python cerberus
-  if (!result)
+  if(!result)
   {
     std::cerr << "Failure trying to validate this data:" << std::endl;
     std::cerr << data << std::endl;
     std::cerr << "against this schema:" << std::endl;
     std::cerr << schema << std::endl;
     std::cerr << "The following reasons were given:" << std::endl;
-    validator.printErrors(std::cerr);
+    validator.printErrors(std::cerr);    
   }
-  return result;
-}
-
-int main()
-{
-  bool success = true;
-
-  success = success && testcase(
-    "uuid:             \n"
-    "  type: integer   \n"
-    "  default: 1042   \n"
-    ,
-    ""
-  );
-
-  success = success && testcase(
-    "uuid:             \n"
-    "  type: integer   \n"
-    "  required: true  \n"
-    ,
-    "uuid: 1042"
-  );
-
-  return success ? 0 : 1;
+  return result ? 0 : 1;
 }

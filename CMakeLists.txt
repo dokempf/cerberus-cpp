@@ -2,6 +2,8 @@ project(cerberus-cpp LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.11)
 
+include(CTest)
+
 find_package(yaml-cpp REQUIRED)
 find_package(PythonLibs)
 
