@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
   auto input = YAML::LoadFile(argv[1]);
   Cerberus::Validator validator(input["schema"]);
-  auto result = validator.validate(input["data"]) ? 0 : 1;
+  auto result = validator.validate(input["data"]);
 
   if(!result)
   {
