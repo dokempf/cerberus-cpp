@@ -8,14 +8,14 @@ int main(int argc, char** argv)
 {
   auto input = YAML::LoadFile(argv[1]);
   Cerberus::Validator validator(input["schema"]);
-  auto result validator.validate(input["data"]) ? 0 : 1;
+  auto result = validator.validate(input["data"]) ? 0 : 1;
 
   if(!result)
   {
     std::cerr << "Failure trying to validate this data:" << std::endl;
-    std::cerr << data << std::endl;
+    std::cerr << input["data"] << std::endl;
     std::cerr << "against this schema:" << std::endl;
-    std::cerr << schema << std::endl;
+    std::cerr << input["schema"] << std::endl;
     std::cerr << "The following reasons were given:" << std::endl;
     validator.printErrors(std::cerr);    
   }
