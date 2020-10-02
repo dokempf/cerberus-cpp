@@ -45,9 +45,15 @@ namespace Cerberus {
 
           auto type = schema.as<std::string>();
           if (type == "list")
-          {}
+          {
+            if(!data.IsSequence())
+              v.raiseError({"Expecting a list"});
+          }
           else if(type == "dict")
-          {}
+          {
+            if(!data.IsMap())
+              v.raiseError({"Expecting a map"});
+          }
           else
             if (!v.applyType(type, data))
               v.raiseError({"Error in type rule"});
@@ -66,18 +72,29 @@ namespace Cerberus {
         }
       );
 
+      registerRule(
+        YAML::Load(
+          "schema:       \n"
+          "  type: dict    "
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          v.validate(data, schema);
+        }
+      ); 
+
       // Normalization rules
       registerNormalizationRule(
         YAML::Load("default: {}"),
-        [](ValidationState&, const YAML::Node& schema, const YAML::Node& data, YAML::Node& vdata)
+        [](ValidationState&, const YAML::Node& schema, YAML::Node& data)
         {
           if(data.IsNull())
-            vdata = schema;
+            data = schema;
         }
       );
 
       // Populate the types map
-      registerType<int>("integer");
+      registerType<long long>("integer");
       registerType<std::string>("string");
       registerType<long double>("float");
       registerType<bool>("boolean");
@@ -115,18 +132,18 @@ namespace Cerberus {
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
       // Validate the given schema
-      state.errors.clear();
-      state.document = schema;
-      state.validate(state.normalize(schema, schema_schema), schema_schema);
-      if (!state.errors.empty())
-      {
-        state.printErrors(std::cerr);
-        throw std::exception{};
-      }
+      // state.errors.clear();
+      // state.document = schema;
+      // state.validate(state.normalize(schema, schema_schema), schema_schema);
+      // if (!state.errors.empty())
+      // {
+      //   state.printErrors(std::cerr);
+      //   throw std::exception{};
+      // }
 
       state.errors.clear();
       state.document = data;
-      state.validate(state.normalize(data, schema), schema);
+      state.validate(data, schema);
       return state.errors.empty();
     }
 
@@ -153,9 +170,9 @@ namespace Cerberus {
         validator.rulemapping[name](*this, schema, data);
       }
 
-      void applyNormalization(const std::string& name, const YAML::Node& schema, const YAML::Node& data, YAML::Node& vdata)
+      void applyNormalization(const std::string& name, const YAML::Node& schema, YAML::Node& data)
       {
-        validator.normalizationmapping[name](*this, schema, data, vdata);
+        validator.normalizationmapping[name](*this, schema, data);
       }
 
       bool applyType(const std::string& name, const YAML::Node& data)
@@ -168,33 +185,35 @@ namespace Cerberus {
         errors.push_back(error);
       }
 
-      YAML::Node normalize(const YAML::Node& data, const YAML::Node& schema)
+      void normalize(const YAML::Node& schema)
       {
         // Perform normalization
         for(auto fieldrules : schema)
         {
           YAML::Node subdata;
-          if (auto d = data[fieldrules.first])
+          if (auto d = document[fieldrules.first])
             subdata = d;
-
-          YAML::Node normalized_subdata(subdata);
 
           for(auto ruleval : fieldrules.second)
           {
             try {
-              applyNormalization(ruleval.first.as<std::string>(), ruleval.second, subdata, normalized_subdata);
+              applyNormalization(ruleval.first.as<std::string>(), ruleval.second, subdata);
             }
             catch(std::bad_function_call)
             {}
           }
-          document[fieldrules.first] = normalized_subdata;
-        }
 
-        return document;
+          if(!subdata.IsNull())
+            document[fieldrules.first] = subdata;
+        }
       }
 
       bool validate(const YAML::Node& data, const YAML::Node& schema)
       {
+        document = data;
+        normalize(schema);
+        auto backup = YAML::Clone(document);
+
         // Perform validation
         for(auto fieldrules : schema)
         {
@@ -212,13 +231,13 @@ namespace Cerberus {
             {
               if(!validator.normalizationmapping[ruleval.first.as<std::string>()])
               {
-                std::cerr << "Unknown rule " << ruleval.first.as<std::string>() << std::endl;
-                std::cerr << "This will be replaced with validation in the future";
+                raiseError({"Unknown rule " + ruleval.first.as<std::string>()});
               }
             }
           }
         }
 
+        document = backup;
         return errors.empty();
       }
 
@@ -243,7 +262,7 @@ namespace Cerberus {
     // * The data
     // * The normalized return data
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&)>> rulemapping;
-    std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&, YAML::Node&)>> normalizationmapping;
+    std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, YAML::Node&)>> normalizationmapping;
     std::map<std::string, std::function<bool(const YAML::Node&)>> typesmapping;
 
     // The schema that is used to validate user provided schemas.

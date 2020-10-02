@@ -33,7 +33,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] regex
   * [ ] require_all
   * [x] required
-  * [ ] schema (dict)
+  * x ] schema (dict)
   * [ ] schema (list)
   * [ ] type
     *  [x] integer
@@ -44,7 +44,7 @@ This is the roadmap towards cerberus feature completeness:
     *  [ ] binary
     *  [ ] date
     *  [ ] datetime
-    *  [ ] dict
+    *  [x] dict
     *  [ ] list
     *  [ ] set
   * [ ] valuesrules
