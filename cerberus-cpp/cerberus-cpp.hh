@@ -236,16 +236,6 @@ namespace Cerberus {
         , errors(other.errors)
       {}
 
-      void applyRule(const std::string& name, const YAML::Node& schema, const YAML::Node& data)
-      {
-        validator.rulemapping.at(name)(*this, schema, data);
-      }
-
-      void applyNormalization(const std::string& name, const YAML::Node& schema, YAML::Node& data)
-      {
-        validator.normalizationmapping.at(name)(*this, schema, data);
-      }
-
       void raiseError(ValidationErrorItem error)
       {
         errors->push_back(error);
@@ -267,12 +257,12 @@ namespace Cerberus {
 
           for(auto ruleval : fieldrules.second)
           {
-            try {
-              applyNormalization(ruleval.first.as<std::string>(), ruleval.second, subdata);
+            auto rule = ruleval.first.as<std::string>();
+            if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
+            {
+              validator.normalizationmapping[rule](*this, ruleval.second, subdata);
               document[fieldrules.first] = subdata;
             }
-            catch(std::out_of_range)
-            {}
           }
 
           schema_stack->pop_back();
@@ -289,19 +279,17 @@ namespace Cerberus {
         // Perform validation
         for(auto fieldrules : schema)
         {
-          auto field = fieldrules.first.as<std::string>();
+          field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
           schema_stack->push_back(rules);
-          
+
           const auto& subdata = document[field];
 
           for(auto ruleval : rules)
           {
-            try {
-              applyRule(ruleval.first.as<std::string>(), ruleval.second, subdata);
-            }
-            catch(std::out_of_range)
-            {}
+            auto rule = ruleval.first.as<std::string>();
+            if(validator.rulemapping.find(rule) != validator.rulemapping.end())
+              validator.rulemapping[rule](*this, ruleval.second, subdata);
           }
 
           schema_stack->pop_back();
