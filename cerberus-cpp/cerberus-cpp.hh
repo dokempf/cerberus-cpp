@@ -153,7 +153,6 @@ namespace Cerberus {
         {
           ValidationState vnew(v);
           vnew.document = data;
-          vnew.normalize(schema);
           vnew.validate(schema);
         }
       ); 
@@ -204,7 +203,6 @@ namespace Cerberus {
     {
       state.errors->clear();
       state.document = YAML::Clone(data);
-      state.normalize(schema);
       state.validate(schema);
       return state.errors->empty();
     }
@@ -241,36 +239,6 @@ namespace Cerberus {
         errors->push_back(error);
       }
 
-      void normalize(const YAML::Node& schema)
-      {
-        // Store the schema in validation state to have it accessible in rules
-        schema_stack->push_back(schema);
-
-        // Perform normalization
-        for(auto fieldrules : schema)
-        {
-          YAML::Node subdata;
-          if (auto d = document[fieldrules.first])
-            subdata = d;
-
-          schema_stack->push_back(fieldrules.second);
-
-          for(auto ruleval : fieldrules.second)
-          {
-            auto rule = ruleval.first.as<std::string>();
-            if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
-            {
-              validator.normalizationmapping[rule](*this, ruleval.second, subdata);
-              document[fieldrules.first] = subdata;
-            }
-          }
-
-          schema_stack->pop_back();
-        }
-
-        schema_stack->pop_back();
-      }
-
       bool validate(const YAML::Node& schema)
       {
         // Store the schema in validation state to have it accessible in rules
@@ -279,18 +247,31 @@ namespace Cerberus {
         // Perform validation
         for(auto fieldrules : schema)
         {
-          field = fieldrules.first.as<std::string>();
+          auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
           schema_stack->push_back(rules);
 
-          const auto& subdata = document[field];
+          YAML::Node subdata;
+          if (auto d = document[field])
+            subdata = d;
 
+          // Apply normalization rules
+          for(auto ruleval : rules)
+          {
+            auto rule = ruleval.first.as<std::string>();
+            if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
+              validator.normalizationmapping[rule](*this, ruleval.second, subdata);
+          }
+
+          // Apply validation rules
           for(auto ruleval : rules)
           {
             auto rule = ruleval.first.as<std::string>();
             if(validator.rulemapping.find(rule) != validator.rulemapping.end())
               validator.rulemapping[rule](*this, ruleval.second, subdata);
           }
+
+          document[field] = subdata;
 
           schema_stack->pop_back();
         }
