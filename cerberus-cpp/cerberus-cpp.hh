@@ -81,8 +81,8 @@ namespace Cerberus {
         {
           ValidationState vnew(v);
           vnew.document = data;
-          v.normalize(schema);
-          v.validate(schema);
+          vnew.normalize(schema);
+          vnew.validate(schema);
         }
       ); 
 
@@ -162,12 +162,12 @@ namespace Cerberus {
 
       void applyRule(const std::string& name, const YAML::Node& schema, const YAML::Node& data)
       {
-        validator.rulemapping[name](*this, schema, data);
+        validator.rulemapping.at(name)(*this, schema, data);
       }
 
       void applyNormalization(const std::string& name, const YAML::Node& schema, YAML::Node& data)
       {
-        validator.normalizationmapping[name](*this, schema, data);
+        validator.normalizationmapping.at(name)(*this, schema, data);
       }
 
       bool applyType(const std::string& name, const YAML::Node& data)
@@ -194,12 +194,11 @@ namespace Cerberus {
             try {
               applyNormalization(ruleval.first.as<std::string>(), ruleval.second, subdata);
             }
-            catch(std::bad_function_call)
+            catch(std::out_of_range)
             {}
           }
 
-          if(!subdata.IsNull())
-            document[fieldrules.first] = subdata;
+          document[fieldrules.first] = subdata;
         }
       }
 
@@ -218,13 +217,8 @@ namespace Cerberus {
             try {
               applyRule(ruleval.first.as<std::string>(), ruleval.second, subdata);
             }
-            catch(std::bad_function_call)
-            {
-              if(!validator.normalizationmapping[ruleval.first.as<std::string>()])
-              {
-                raiseError({"Unknown rule " + ruleval.first.as<std::string>()});
-              }
-            }
+            catch(std::out_of_range)
+            {}
           }
         }
 
