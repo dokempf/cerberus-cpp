@@ -131,16 +131,6 @@ namespace Cerberus {
 
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
-      // Validate the given schema
-      // state.errors.clear();
-      // state.document = schema;
-      // state.validate(state.normalize(schema, schema_schema), schema_schema);
-      // if (!state.errors.empty())
-      // {
-      //   state.printErrors(std::cerr);
-      //   throw std::exception{};
-      // }
-
       state.errors.clear();
       state.document = data;
       state.validate(data, schema);
