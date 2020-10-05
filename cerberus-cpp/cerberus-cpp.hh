@@ -203,7 +203,7 @@ namespace Cerberus {
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
       state.errors->clear();
-      state.document = data;
+      state.document = YAML::Clone(data);
       state.normalize(schema);
       state.validate(schema);
       return state.errors->empty();
