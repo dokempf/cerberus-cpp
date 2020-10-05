@@ -14,7 +14,11 @@ In reality, some inconsistencies exist. Some of these are bugs, but others
 are features. The latter ones will not go away but are intentional design
 decisions that were necessary to implement cerberus in a strongly typed world:
 
-* The `min` and `max` rules require the presence of the `type` rule.
+* Several validation rules require the `type` rule to be present as well.
+  These are the rules that require equality or comparison to be implemented e.g.:
+  * `min` and `max`
+  * `allowed`
+  Your safest bet is to *always* define the `type` rule.
 
 # Road map
 
@@ -25,6 +29,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] Validation of schemas against Schema Schema
 * Validation Rules
   * [ ] allof
+  * [x] allowed
   * [ ] anyof
   * [ ] check_with
   * [ ] contains

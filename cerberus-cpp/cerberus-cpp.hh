@@ -63,6 +63,26 @@ namespace Cerberus {
       , state(*this)
     {
       registerRule(
+        YAML::Load(
+          "allowed:\n"
+          "  type: list\n"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          // Extract type information from the larger schema
+          auto type = v.extractType();
+
+          bool found = false;
+          for(auto item: schema)
+            if (type->equality(item, data))
+              found = true;
+          
+          if(!found)
+            v.raiseError({"Value disallowed by Allowed-Rule!"});
+        }
+      );
+
+      registerRule(
         YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
       );
@@ -72,16 +92,9 @@ namespace Cerberus {
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
           // Extract type information from the larger schema
-          std::string type;
-          if(v.schema_stack->back()["type"])
-            type = v.schema_stack->back()["type"].as<std::string>();
-          else
-          {
-            v.raiseError({"Max-Rule requires type information in cerberus-cpp!"});
-            return;
-          }
+          auto type = v.extractType();
 
-          if((v.validator.typesmapping[type]->less(schema, data)) || (v.validator.typesmapping[type]->equality(data, schema)))
+          if((type->less(schema, data)) || (type->equality(data, schema)))
             v.raiseError({"Max-Rrule violated!"});
         }
       );
@@ -91,16 +104,9 @@ namespace Cerberus {
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
           // Extract type information from the larger schema
-          std::string type;
-          if(v.schema_stack->back()["type"])
-            type = v.schema_stack->back()["type"].as<std::string>();
-          else
-          {
-            v.raiseError({"Min-Rule requires type information in cerberus-cpp!"});
-            return;
-          }
+          auto type = v.extractType();
 
-          if(!(v.validator.typesmapping[type]->less(schema, data)))
+          if(!(type->less(schema, data)))
             v.raiseError({"Min-Rule violated!"});
         }
       );
@@ -287,6 +293,12 @@ namespace Cerberus {
       {
         for(auto error: *errors)
           stream << error.message << std::endl;
+      }
+
+      const std::shared_ptr<TypeItemBase>& extractType()
+      {
+        auto type = schema_stack->back()["type"].as<std::string>();
+        return validator.typesmapping[type];
       }
 
       Validator& validator;
