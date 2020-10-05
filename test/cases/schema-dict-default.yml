@@ -1,0 +1,9 @@
+schema:
+  user:
+    type: dict
+    schema:
+      uuid:
+        type: integer
+        default: 1042
+data: {}
+  
