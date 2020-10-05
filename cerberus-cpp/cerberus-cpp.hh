@@ -229,6 +229,13 @@ namespace Cerberus {
         , errors(std::make_shared<std::vector<ValidationErrorItem>>())
       {}
 
+      ValidationState(const ValidationState& other)
+        : validator(other.validator)
+        , document(YAML::Clone(other.document))
+        , schema_stack(other.schema_stack)
+        , errors(other.errors)
+      {}
+
       void applyRule(const std::string& name, const YAML::Node& schema, const YAML::Node& data)
       {
         validator.rulemapping.at(name)(*this, schema, data);
