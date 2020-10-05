@@ -26,7 +26,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] items
   * [ ] keysrules
   * [x] meta
-  * [ ] min, max
+  * [x] min, max
   * [ ] minlenght, maxlength
   * [ ] oneof
   * [ ] readonly

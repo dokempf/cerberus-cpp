@@ -17,6 +17,40 @@ namespace Cerberus {
     std::string message;
   };
 
+  struct TypeItemBase
+  {
+    virtual bool is_convertible(const YAML::Node&) const = 0;
+    virtual bool equality(const YAML::Node&, const YAML::Node&) const = 0;
+    virtual bool less(const YAML::Node&, const YAML::Node&) const = 0;
+  };
+
+  template<typename T>
+  struct TypeItem
+    : TypeItemBase
+  {
+    virtual bool is_convertible(const YAML::Node& node) const override
+    {
+      T val;
+      return YAML::convert<T>::decode(node, val);
+    }
+
+    virtual bool equality(const YAML::Node& op1, const YAML::Node& op2) const override
+    {
+      T cop1, cop2;
+      YAML::convert<T>::decode(op1, cop1);
+      YAML::convert<T>::decode(op2, cop2);
+      return cop1 == cop2;
+    }
+
+    virtual bool less(const YAML::Node& op1, const YAML::Node& op2) const override
+    {
+      T cop1, cop2;
+      YAML::convert<T>::decode(op1, cop1);
+      YAML::convert<T>::decode(op2, cop2);
+      return cop1 < cop2;
+    }
+  };
+
   class Validator
   {
     public:
@@ -31,6 +65,44 @@ namespace Cerberus {
       registerRule(
         YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
+      );
+
+      registerRule(
+        YAML::Load("max: {}"),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          // Extract type information from the larger schema
+          std::string type;
+          if(v.schema_stack->back()["type"])
+            type = v.schema_stack->back()["type"].as<std::string>();
+          else
+          {
+            v.raiseError({"Max-Rule requires type information in cerberus-cpp!"});
+            return;
+          }
+
+          if((v.validator.typesmapping[type]->less(schema, data)) || (v.validator.typesmapping[type]->equality(data, schema)))
+            v.raiseError({"Max-Rrule violated!"});
+        }
+      );
+
+      registerRule(
+        YAML::Load("min: {}"),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          // Extract type information from the larger schema
+          std::string type;
+          if(v.schema_stack->back()["type"])
+            type = v.schema_stack->back()["type"].as<std::string>();
+          else
+          {
+            v.raiseError({"Min-Rule requires type information in cerberus-cpp!"});
+            return;
+          }
+
+          if(!(v.validator.typesmapping[type]->less(schema, data)))
+            v.raiseError({"Min-Rule violated!"});
+        }
       );
 
       registerRule(
@@ -55,7 +127,7 @@ namespace Cerberus {
               v.raiseError({"Expecting a map"});
           }
           else
-            if (!v.applyType(type, data))
+            if (!v.validator.typesmapping[type]->is_convertible(data))
               v.raiseError({"Error in type rule"});
         }
       );
@@ -106,11 +178,7 @@ namespace Cerberus {
     template<typename T>
     void registerType(const std::string& name)
     {
-      typesmapping[name] = [](const YAML::Node& node)
-      {
-        T val;
-        return YAML::convert<T>::decode(node, val);
-      };
+      typesmapping[name] = std::make_shared<TypeItem<T>>();
     }
 
     template<typename Rule>
@@ -157,6 +225,7 @@ namespace Cerberus {
     {
       ValidationState(Validator& validator)
         : validator(validator)
+        , schema_stack(std::make_shared<std::vector<YAML::Node>>())
         , errors(std::make_shared<std::vector<ValidationErrorItem>>())
       {}
 
@@ -170,11 +239,6 @@ namespace Cerberus {
         validator.normalizationmapping.at(name)(*this, schema, data);
       }
 
-      bool applyType(const std::string& name, const YAML::Node& data)
-      {
-        return validator.typesmapping[name](data);
-      }
-
       void raiseError(ValidationErrorItem error)
       {
         errors->push_back(error);
@@ -182,6 +246,9 @@ namespace Cerberus {
 
       void normalize(const YAML::Node& schema)
       {
+        // Store the schema in validation state to have it accessible in rules
+        schema_stack->push_back(schema);
+
         // Perform normalization
         for(auto fieldrules : schema)
         {
@@ -189,26 +256,35 @@ namespace Cerberus {
           if (auto d = document[fieldrules.first])
             subdata = d;
 
+          schema_stack->push_back(fieldrules.second);
+
           for(auto ruleval : fieldrules.second)
           {
             try {
               applyNormalization(ruleval.first.as<std::string>(), ruleval.second, subdata);
+              document[fieldrules.first] = subdata;
             }
             catch(std::out_of_range)
             {}
           }
 
-          document[fieldrules.first] = subdata;
+          schema_stack->pop_back();
         }
+
+        schema_stack->pop_back();
       }
 
       bool validate(const YAML::Node& schema)
       {
+        // Store the schema in validation state to have it accessible in rules
+        schema_stack->push_back(schema);
+
         // Perform validation
         for(auto fieldrules : schema)
         {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
+          schema_stack->push_back(rules);
           
           const auto& subdata = document[field];
 
@@ -220,7 +296,11 @@ namespace Cerberus {
             catch(std::out_of_range)
             {}
           }
+
+          schema_stack->pop_back();
         }
+
+        schema_stack->pop_back();
 
         return errors->empty();
       }
@@ -235,6 +315,7 @@ namespace Cerberus {
 
       Validator& validator;
       YAML::Node document;
+      std::shared_ptr<std::vector<YAML::Node>> schema_stack;
       std::shared_ptr<std::vector<ValidationErrorItem>> errors;
     };
 
@@ -247,7 +328,7 @@ namespace Cerberus {
     // * The normalized return data
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&)>> rulemapping;
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, YAML::Node&)>> normalizationmapping;
-    std::map<std::string, std::function<bool(const YAML::Node&)>> typesmapping;
+    std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
     // The schema that is used to validate user provided schemas.
     // This is update with snippets as rules are registered
