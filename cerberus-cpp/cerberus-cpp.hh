@@ -2,9 +2,9 @@
 
 #include<yaml-cpp/yaml.h>
 
-#include<exception>
 #include<functional>
 #include<map>
+#include<memory>
 #include<string>
 
 #include<iostream>
@@ -79,7 +79,10 @@ namespace Cerberus {
         ),
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
-          v.validate(data, schema);
+          ValidationState vnew(v);
+          vnew.document = data;
+          v.normalize(schema);
+          v.validate(schema);
         }
       ); 
 
@@ -131,10 +134,11 @@ namespace Cerberus {
 
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
-      state.errors.clear();
+      state.errors->clear();
       state.document = data;
-      state.validate(data, schema);
-      return state.errors.empty();
+      state.normalize(schema);
+      state.validate(schema);
+      return state.errors->empty();
     }
 
     YAML::Node getDocument() const
@@ -153,6 +157,7 @@ namespace Cerberus {
     {
       ValidationState(Validator& validator)
         : validator(validator)
+        , errors(std::make_shared<std::vector<ValidationErrorItem>>())
       {}
 
       void applyRule(const std::string& name, const YAML::Node& schema, const YAML::Node& data)
@@ -172,7 +177,7 @@ namespace Cerberus {
 
       void raiseError(ValidationErrorItem error)
       {
-        errors.push_back(error);
+        errors->push_back(error);
       }
 
       void normalize(const YAML::Node& schema)
@@ -198,12 +203,8 @@ namespace Cerberus {
         }
       }
 
-      bool validate(const YAML::Node& data, const YAML::Node& schema)
+      bool validate(const YAML::Node& schema)
       {
-        document = data;
-        normalize(schema);
-        auto backup = YAML::Clone(document);
-
         // Perform validation
         for(auto fieldrules : schema)
         {
@@ -227,21 +228,20 @@ namespace Cerberus {
           }
         }
 
-        document = backup;
-        return errors.empty();
+        return errors->empty();
       }
 
       // TODO: This should be replaced with a more general error handling concept
       template<typename Stream>
       void printErrors(Stream& stream) const
       {
-        for(auto error: errors)
+        for(auto error: *errors)
           stream << error.message << std::endl;
       }
 
       Validator& validator;
       YAML::Node document;
-      std::vector<ValidationErrorItem> errors;
+      std::shared_ptr<std::vector<ValidationErrorItem>> errors;
     };
 
     YAML::Node schema_;
