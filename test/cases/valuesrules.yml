@@ -1,0 +1,11 @@
+schema:
+  roles:
+    type: dict
+    valuesrules:
+      type: string
+      forbidden:
+        - admin
+data:
+  roles:
+    me: user
+  

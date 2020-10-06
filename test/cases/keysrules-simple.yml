@@ -1,0 +1,11 @@
+schema:
+  users:
+    type: dict
+    keysrules:
+      type: string
+      forbidden:
+        - admin
+data:
+  users:
+    me:
+      some: data

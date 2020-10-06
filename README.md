@@ -60,7 +60,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] excludes
   * [x] forbidden
   * [x] items
-  * [ ] keysrules
+  * [x] keysrules
   * [x] meta
   * [x] min, max
   * [x] minlength, maxlength
@@ -84,7 +84,7 @@ This is the roadmap towards cerberus feature completeness:
     *  [x] dict
     *  [ ] list
     *  [ ] set
-  * [ ] valuesrules
+  * [x] valuesrules
 * Normalization Rules
   * [ ] Renaming
   * [ ] Purging

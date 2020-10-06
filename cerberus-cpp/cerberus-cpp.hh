@@ -123,6 +123,22 @@ namespace Cerberus {
       );
 
       registerRule(
+        YAML::Load(
+          "keysrules:\n"
+          "  type: dict"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          ValidationState vnew(v);
+          for(auto item: data)
+          {
+            vnew.document = YAML::Clone(item.first);
+            vnew.validateItem(schema, vnew.document);
+          }
+        }
+      );
+
+      registerRule(
         YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
       );
@@ -290,6 +306,23 @@ namespace Cerberus {
             v.raiseError({"Schema-Rule is only available for type=dict|list"});
         }
       ); 
+
+      registerRule(
+        YAML::Load(
+          "valuesrules:\n"
+          "  type: dict"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          ValidationState vnew(v);
+          for(auto item: data)
+          {
+            vnew.document = YAML::Clone(item.second);
+            vnew.validateItem(schema, vnew.document);
+          }
+        }
+      );
+
 
       // Normalization rules
       registerNormalizationRule(
