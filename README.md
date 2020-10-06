@@ -44,7 +44,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] minlength, maxlength
   * [ ] oneof
   * [ ] readonly
-  * [ ] regex
+  * [x] regex
   * [ ] require_all
   * [x] required
   * [x] schema (dict)

@@ -5,6 +5,7 @@
 #include<functional>
 #include<map>
 #include<memory>
+#include<regex>
 #include<string>
 
 #include<iostream>
@@ -156,6 +157,18 @@ namespace Cerberus {
             if(count < schema.as<int>())
               v.raiseError({"Minlength-Rule violated!"});
           }
+        }
+      );
+
+      registerRule(
+        YAML::Load(
+          "regex: \n"
+          "  type: string"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          if(!std::regex_match(data.as<std::string>(), std::regex(schema.as<std::string>())))
+            v.raiseError({"Regex-Rule violated!"});
         }
       );
 
