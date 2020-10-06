@@ -9,16 +9,38 @@ library.
 
 # Incompatibilities between cerberus and cerberus-cpp
 
-Cerberus-cpp tries to be fully compatible with the Python package cerberus.
-In reality, some inconsistencies exist. Some of these are bugs, but others
-are features. The latter ones will not go away but are intentional design
-decisions that were necessary to implement cerberus in a strongly typed world:
+Cerberus-cpp tries to be compatible with the Python package cerberus.
+In reality, some inconsistencies exist. If you have a use case where
+cerberus-cpp differs from cerberus that cannot be explained by one of
+the following reasons please open an issue attaching YAML files with
+schema and data:
 
 * Several validation rules require the `type` rule to be present as well.
   These are the rules that require equality or comparison to be implemented e.g.:
   * `min` and `max`
   * `allowed`
   Your safest bet is to *always* define the `type` rule.
+* The `allowed` rule does not validate iterables, because that would lead to
+  conflicting semantics of the `type` field.
+* Some of the scalar types built into cerberus are hard to implement in C++ and
+  are therefore omitted from the library. If you need these, register a custom type
+  and choose the correct C++ data structure yourself. These are:
+  * `data` and `datetime`: With C++ lacking standardization of these types and
+    completely missing a parser for such types, it would be unwise to implement
+    these.
+  * `binary`: There is no sensible C++ equivalent of a Python bytes object, so
+    it seems wise to skip on this one.
+* The following rules are currently considered a *won't fix* for one reason or
+  the other:
+  * `allof`, `anyof`, `noneof`, `oneof`: These rules are a major headache to
+    implement. Yet, the cerberus documentation actively warns users that the need
+    for such rule hints at a design flaw. Also, these rules disable normalization.
+    Currently, I would rather opt to not doing these rules at all.
+  * `readonly`: Just from reading the documentation I do not get both the semantics
+    or the use case for this rule. So, I am omitting it until somebody urges me to
+    implement it.
+  * `check_with`: In the context of cerberus-cpp, I fail to see how this rule differs
+    from applying a custom rule, which you should do in that case.
 
 # Road map
 
@@ -28,10 +50,10 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] Schema registration
   * [ ] Validation of schemas against Schema Schema
 * Validation Rules
-  * [ ] allof
+  * [x] allof
   * [x] allowed
-  * [ ] anyof
-  * [ ] check_with
+  * [x] anyof
+  * [x] check_with
   * [ ] contains
   * [ ] dependencies
   * [ ] empty
@@ -42,8 +64,9 @@ This is the roadmap towards cerberus feature completeness:
   * [x] meta
   * [x] min, max
   * [x] minlength, maxlength
-  * [ ] oneof
-  * [ ] readonly
+  * [x] noneof
+  * [x] oneof
+  * [x] readonly
   * [x] regex
   * [ ] require_all
   * [x] required
