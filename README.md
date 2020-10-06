@@ -30,6 +30,10 @@ schema and data:
     these.
   * `binary`: There is no sensible C++ equivalent of a Python bytes object, so
     it seems wise to skip on this one.
+* The `regex` rule is not guaranteed to accept exactly the same dialect of
+  regular expressions as in the Python package. Currently, the C++ implementation
+  uses plain `std::regex`. Maybe this can be fixed by picking the correct grammar
+  for `std::regex`.
 * The following rules are currently considered a *won't fix* for one reason or
   the other:
   * `allof`, `anyof`, `noneof`, `oneof`: These rules are a major headache to
