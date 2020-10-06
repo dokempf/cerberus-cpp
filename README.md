@@ -59,7 +59,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] empty
   * [ ] excludes
   * [x] forbidden
-  * [ ] items
+  * [x] items
   * [ ] keysrules
   * [x] meta
   * [x] min, max

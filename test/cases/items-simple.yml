@@ -1,0 +1,10 @@
+schema:
+  field:
+    type: list
+    items:
+      - type: integer
+      - type: string
+data:
+  field:
+    - 42
+    - foobar

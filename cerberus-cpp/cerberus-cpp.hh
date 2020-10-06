@@ -105,6 +105,24 @@ namespace Cerberus {
       );
 
       registerRule(
+        YAML::Load(
+          "items:\n"
+          "  type: list"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          auto schemait = schema.begin();
+          auto datait = data.begin();
+          while (schemait != schema.end())
+          {
+            ValidationState vnew(v);
+            vnew.document = YAML::Clone(*(datait++));
+            vnew.validateItem(*(schemait++), vnew.document);
+          }
+        }
+      );
+
+      registerRule(
         YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
       );
