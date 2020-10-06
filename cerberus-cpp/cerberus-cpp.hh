@@ -17,6 +17,13 @@ namespace Cerberus {
     std::string message;
   };
 
+  enum class SchemaRuleType
+  {
+    UNSUPPORTED = 0,
+    DICT = 1,
+    LIST = 2
+  };
+
   struct TypeItemBase
   {
     virtual bool is_convertible(const YAML::Node&) const = 0;
@@ -157,9 +164,38 @@ namespace Cerberus {
         ),
         [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
         {
-          ValidationState vnew(v);
-          vnew.document = data;
-          vnew.validate(schema);
+          // Detect whether this is the schema(list) or schema(dict) rule by investigating
+          // either the type information explicitly given or looking at the given data
+          SchemaRuleType subrule = SchemaRuleType::UNSUPPORTED;
+          auto typenode = v.schema_stack->back()["type"];
+          if(typenode)
+          {
+            auto type = typenode.as<std::string>();
+            if(type == "dict")
+              subrule = SchemaRuleType::DICT;
+            if(type == "list")
+              subrule = SchemaRuleType::LIST;
+          }
+          else
+          {
+            if(data.IsMap())
+              subrule = SchemaRuleType::DICT;
+            if(data.IsSequence())
+              subrule = SchemaRuleType::LIST;
+          }
+
+          if(subrule == SchemaRuleType::DICT)
+          {
+            ValidationState vnew(v);
+            vnew.document = data;
+            vnew.validate(schema);
+          }
+          if(subrule == SchemaRuleType::LIST)
+          {
+
+          }
+          if(subrule == SchemaRuleType::UNSUPPORTED)
+            v.raiseError({"Schema-Rule is only available for type=dict|list"});
         }
       ); 
 
@@ -245,6 +281,25 @@ namespace Cerberus {
         errors->push_back(error);
       }
 
+      void validateItem(const YAML::Node& schema, YAML::Node& data)
+      {
+        // Apply normalization rules
+        for(auto ruleval : schema)
+        {
+          auto rule = ruleval.first.as<std::string>();
+          if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
+            validator.normalizationmapping[rule](*this, ruleval.second, data);
+        }
+
+        // Apply validation rules
+        for(auto ruleval : schema)
+        {
+          auto rule = ruleval.first.as<std::string>();
+          if(validator.rulemapping.find(rule) != validator.rulemapping.end())
+            validator.rulemapping[rule](*this, ruleval.second, data);
+        }
+      }
+
       bool validate(const YAML::Node& schema)
       {
         // Store the schema in validation state to have it accessible in rules
@@ -261,22 +316,7 @@ namespace Cerberus {
           if (auto d = document[field])
             subdata = d;
 
-          // Apply normalization rules
-          for(auto ruleval : rules)
-          {
-            auto rule = ruleval.first.as<std::string>();
-            if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
-              validator.normalizationmapping[rule](*this, ruleval.second, subdata);
-          }
-
-          // Apply validation rules
-          for(auto ruleval : rules)
-          {
-            auto rule = ruleval.first.as<std::string>();
-            if(validator.rulemapping.find(rule) != validator.rulemapping.end())
-              validator.rulemapping[rule](*this, ruleval.second, subdata);
-          }
-
+          validateItem(rules, subdata);
           document[field] = subdata;
 
           schema_stack->pop_back();
