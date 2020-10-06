@@ -1,0 +1,10 @@
+schema:
+  field:
+    type: list
+    minlength: 2
+    schema:
+      type: integer
+data:
+  field:
+    - 2
+    - 4

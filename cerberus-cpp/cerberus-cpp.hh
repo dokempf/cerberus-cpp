@@ -119,6 +119,48 @@ namespace Cerberus {
 
       registerRule(
         YAML::Load(
+          "maxlength:\n"
+          "  type: integer \n"
+          "  min: 1"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          if(!((data.IsSequence()) || (data.IsMap())))
+            v.raiseError({"Maxlength-Rule applied to non-iterable data container!"});
+          else
+          {
+            unsigned int count = 0;
+            for(auto item: data)
+              ++count;
+            if(count > schema.as<int>())
+              v.raiseError({"Maxlength-Rule violated!"});
+          }
+        }
+      );
+
+      registerRule(
+        YAML::Load(
+          "minlength:\n"
+          "  type: integer \n"
+          "  min: 0"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          if(!((data.IsSequence()) || (data.IsMap())))
+            v.raiseError({"Minlength-Rule applied to non-iterable data container!"});
+          else
+          {
+            unsigned int count = 0;
+            for(auto item: data)
+              ++count;
+            if(count < schema.as<int>())
+              v.raiseError({"Minlength-Rule violated!"});
+          }
+        }
+      );
+
+      registerRule(
+        YAML::Load(
           "type: \n"
           "  type: string"
         ),
