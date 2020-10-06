@@ -48,7 +48,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] require_all
   * [x] required
   * [x] schema (dict)
-  * [ ] schema (list)
+  * [x] schema (list)
   * [ ] type
     *  [x] integer
     *  [x] float

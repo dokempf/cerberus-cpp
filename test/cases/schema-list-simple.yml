@@ -1,0 +1,9 @@
+schema:
+  field:
+    type: list
+    schema:
+      type: integer
+data:
+  field:
+    - 2
+    - 4

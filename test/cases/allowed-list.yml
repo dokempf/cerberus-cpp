@@ -1,0 +1,11 @@
+schema:
+  models:
+    type: list
+    schema:
+      type: string
+      allowed:
+        - linear
+        - nonlinear
+data:
+  models:
+    - linear

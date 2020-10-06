@@ -78,7 +78,6 @@ namespace Cerberus {
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
-
           bool found = false;
           for(auto item: schema)
             if (type->equality(item, data))
@@ -192,7 +191,12 @@ namespace Cerberus {
           }
           if(subrule == SchemaRuleType::LIST)
           {
-
+            ValidationState vnew(v);
+            for(auto item: data)
+            {
+             vnew.document = YAML::Clone(item);
+             vnew.validateItem(schema, vnew.document);
+            }
           }
           if(subrule == SchemaRuleType::UNSUPPORTED)
             v.raiseError({"Schema-Rule is only available for type=dict|list"});
@@ -283,6 +287,8 @@ namespace Cerberus {
 
       void validateItem(const YAML::Node& schema, YAML::Node& data)
       {
+        schema_stack->push_back(schema);
+
         // Apply normalization rules
         for(auto ruleval : schema)
         {
@@ -298,6 +304,8 @@ namespace Cerberus {
           if(validator.rulemapping.find(rule) != validator.rulemapping.end())
             validator.rulemapping[rule](*this, ruleval.second, data);
         }
+
+        schema_stack->pop_back();
       }
 
       bool validate(const YAML::Node& schema)
@@ -310,7 +318,6 @@ namespace Cerberus {
         {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
-          schema_stack->push_back(rules);
 
           YAML::Node subdata;
           if (auto d = document[field])
@@ -318,8 +325,6 @@ namespace Cerberus {
 
           validateItem(rules, subdata);
           document[field] = subdata;
-
-          schema_stack->pop_back();
         }
 
         schema_stack->pop_back();
