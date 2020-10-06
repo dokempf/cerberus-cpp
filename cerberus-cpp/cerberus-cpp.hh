@@ -90,6 +90,21 @@ namespace Cerberus {
       );
 
       registerRule(
+        YAML::Load(
+          "forbidden:\n"
+          "  type: list"
+        ),
+        [](ValidationState& v, const YAML::Node& schema, const YAML::Node& data)
+        {
+          // Extract type information from the larger schema
+          auto type = v.extractType();
+          for(auto item: schema)
+            if (type->equality(item, data))
+              v.raiseError({"Forbidden-Rule violated: " + item.as<std::string>()});
+        }
+      );
+
+      registerRule(
         YAML::Load("meta: {}"),
         [](ValidationState&, const YAML::Node&, const YAML::Node&){}
       );
