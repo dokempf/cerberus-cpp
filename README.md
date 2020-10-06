@@ -78,9 +78,9 @@ This is the roadmap towards cerberus feature completeness:
     *  [x] string
     *  [x] boolean
     *  [ ] number
-    *  [ ] binary
-    *  [ ] date
-    *  [ ] datetime
+    *  [x] binary
+    *  [x] date
+    *  [x] datetime
     *  [x] dict
     *  [ ] list
     *  [ ] set
