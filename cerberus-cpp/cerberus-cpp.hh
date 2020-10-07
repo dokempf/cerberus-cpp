@@ -109,7 +109,7 @@ namespace Cerberus {
           "allowed:\n"
           "  type: list\n"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
@@ -128,7 +128,7 @@ namespace Cerberus {
           "forbidden:\n"
           "  type: list"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
@@ -143,13 +143,13 @@ namespace Cerberus {
           "items:\n"
           "  type: list"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           auto schemait = v.getSchema().begin();
           auto datait = v.document.begin();
           while (schemait != v.getSchema().end())
           {
-            ValidationState vnew(v);
+            RecursiveValidator vnew(v);
             vnew.document = YAML::Clone(*(datait++));
             vnew.validateItem(*(schemait++), vnew.document);
           }
@@ -161,9 +161,9 @@ namespace Cerberus {
           "keysrules:\n"
           "  type: dict"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
-          ValidationState vnew(v);
+          RecursiveValidator vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.first);
@@ -174,12 +174,12 @@ namespace Cerberus {
 
       registerRule(
         YAML::Load("meta: {}"),
-        [](ValidationState&){}
+        [](RecursiveValidator&){}
       );
 
       registerRule(
         YAML::Load("max: {}"),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
@@ -191,7 +191,7 @@ namespace Cerberus {
 
       registerRule(
         YAML::Load("min: {}"),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
@@ -207,7 +207,7 @@ namespace Cerberus {
           "  type: integer \n"
           "  min: 1"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if(!((v.document.IsSequence()) || (v.document.IsMap())))
             v.raiseError({"Maxlength-Rule applied to non-iterable data container!"});
@@ -228,7 +228,7 @@ namespace Cerberus {
           "  type: integer \n"
           "  min: 0"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if(!((v.document.IsSequence()) || (v.document.IsMap())))
             v.raiseError({"Minlength-Rule applied to non-iterable data container!"});
@@ -248,7 +248,7 @@ namespace Cerberus {
           "regex: \n"
           "  type: string"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if(!std::regex_match(v.document.as<std::string>(), std::regex(v.getSchema().as<std::string>())))
             v.raiseError({"Regex-Rule violated!"});
@@ -260,7 +260,7 @@ namespace Cerberus {
           "type: \n"
           "  type: string"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if(v.document.IsNull())
             return;
@@ -288,7 +288,7 @@ namespace Cerberus {
           "required:\n"
           "  type: boolean"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if((v.getSchema().as<bool>()) && (v.document.IsNull()))
             v.raiseError({"Error: Missing required field!"});
@@ -300,7 +300,7 @@ namespace Cerberus {
           "schema:       \n"
           "  type: dict    "
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           // Detect whether this is the schema(list) or schema(dict) rule by investigating
           // either the type information explicitly given or looking at the given data
@@ -328,7 +328,7 @@ namespace Cerberus {
           }
           if(subrule == SchemaRuleType::LIST)
           {
-            ValidationState vnew(v);
+            RecursiveValidator vnew(v);
             for(auto item: v.document)
             {
              vnew.document = YAML::Clone(item);
@@ -345,9 +345,9 @@ namespace Cerberus {
           "valuesrules:\n"
           "  type: dict"
         ),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
-          ValidationState vnew(v);
+          RecursiveValidator vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.second);
@@ -360,7 +360,7 @@ namespace Cerberus {
       // Normalization rules
       registerRule(
         YAML::Load("default: {}"),
-        [](ValidationState& v)
+        [](RecursiveValidator& v)
         {
           if(!v.document.IsDefined())
             v.document = v.getSchema();
@@ -420,15 +420,15 @@ namespace Cerberus {
     }
 
     private:
-    struct ValidationState
+    struct RecursiveValidator
     {
-      ValidationState(Validator& validator)
+      RecursiveValidator(Validator& validator)
         : validator(validator)
         , schema_stack(std::make_shared<std::vector<YAML::Node>>())
         , errors(std::make_shared<std::vector<ValidationErrorItem>>())
       {}
 
-      ValidationState(const ValidationState& other)
+      RecursiveValidator(const RecursiveValidator& other)
         : validator(other.validator)
         , document(YAML::Clone(other.document))
         , schema_stack(other.schema_stack)
@@ -473,7 +473,7 @@ namespace Cerberus {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
 
-          ValidationState vnew(*this);
+          RecursiveValidator vnew(*this);
           vnew.document = document[field];
           vnew.validateItem(rules, vnew.document);
           document[field] = vnew.document;
@@ -510,9 +510,9 @@ namespace Cerberus {
     };
 
     YAML::Node schema_;
-    ValidationState state;
+    RecursiveValidator state;
 
-    std::map<std::string, std::pair<RulePriority, std::function<void(ValidationState&)>>> rulemapping;
+    std::map<std::string, std::pair<RulePriority, std::function<void(RecursiveValidator&)>>> rulemapping;
     std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
     // The schema that is used to validate user provided schemas.
