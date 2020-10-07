@@ -125,15 +125,43 @@ namespace Cerberus {
 
       registerRule(
         YAML::Load(
+          "contains: {}"
+        ),
+        [](RecursiveValidator& v)
+        {
+          std::vector<YAML::Node> needed;
+          if(v.getSchema().IsScalar())
+            needed.push_back(v.getSchema());
+          else if(v.getSchema().IsSequence())
+            for(auto item: v.getSchema())
+              needed.push_back(item);
+          else
+          {
+            v.raiseError({"Contains-Rule expects value or list!"});
+            return;
+          }
+          
+          for(auto item: v.document)
+            for(auto it = needed.begin(); it != needed.end();)
+              if (v.validator.typesmapping["string"]->equality(*it, item))
+                it = needed.erase(it);
+              else
+                ++it;
+
+          if(!needed.empty())
+            v.raiseError({"Contains-Rule violated"});
+        }
+      );
+
+      registerRule(
+        YAML::Load(
           "forbidden:\n"
           "  type: list"
         ),
         [](RecursiveValidator& v)
         {
-          // Extract type information from the larger schema
-          auto type = v.extractType();
           for(auto item: v.getSchema())
-            if (type->equality(item, v.document))
+            if (v.extractType()->equality(item, v.document))
               v.raiseError({"Forbidden-Rule violated: " + item.as<std::string>()});
         }
       );

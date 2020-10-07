@@ -1,0 +1,12 @@
+schema:
+  users:
+    type: list
+    contains:
+      - admin
+      - root
+data:
+  users:
+    - user
+    - root
+    - admin
+  

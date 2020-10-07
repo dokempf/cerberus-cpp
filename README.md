@@ -22,6 +22,10 @@ schema and data:
   Your safest bet is to *always* define the `type` rule.
 * The `allowed` rule does not validate iterables, because that would lead to
   conflicting semantics of the `type` field.
+* The `contains` rule has currently no access to the item type
+  information. It currently assumes string values, although it could be changed
+  to inspect a given `schema` rule for type information - I am not sure yet I
+  want to go that route.
 * Some of the types built into cerberus are hard to implement in C++ and
   are therefore omitted from the library. If you need these, register a custom type
   and choose the correct C++ data structure yourself. These are:
@@ -60,7 +64,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] allowed
   * [x] anyof
   * [x] check_with
-  * [ ] contains
+  * [x] contains
   * [ ] dependencies
   * [ ] empty
   * [ ] excludes
