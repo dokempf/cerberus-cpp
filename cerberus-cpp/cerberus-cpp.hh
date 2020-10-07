@@ -2,10 +2,12 @@
 
 #include<yaml-cpp/yaml.h>
 
+#include<exception>
 #include<functional>
 #include<map>
 #include<memory>
 #include<regex>
+#include<sstream>
 #include<string>
 
 #include<iostream>
@@ -16,6 +18,31 @@ namespace Cerberus {
   struct ValidationErrorItem
   {
     std::string message;
+  };
+
+  class CerberusError
+    : public std::exception
+  {};
+
+  class SchemaError
+    : public CerberusError
+  {
+    public:
+    template<typename V>
+    SchemaError(const V& v)
+    {
+      std::stringstream sstream;
+      v.printErrors(sstream);
+      message = sstream.str().c_str();
+    }
+
+    virtual const char* what() const noexcept override
+    {
+      return message;
+    }
+
+    private:
+    const char* message;
   };
 
   enum class SchemaRuleType
@@ -368,6 +395,13 @@ namespace Cerberus {
 
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
+      // Validate the schema first
+      state.errors->clear();
+      state.document = YAML::Clone(schema);
+      state.validate(schema_schema);
+      if(!state.errors->empty())
+        throw SchemaError(state);
+
       state.errors->clear();
       state.document = YAML::Clone(data);
       state.validate(schema);
