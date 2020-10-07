@@ -22,7 +22,7 @@ schema and data:
   Your safest bet is to *always* define the `type` rule.
 * The `allowed` rule does not validate iterables, because that would lead to
   conflicting semantics of the `type` field.
-* Some of the scalar types built into cerberus are hard to implement in C++ and
+* Some of the types built into cerberus are hard to implement in C++ and
   are therefore omitted from the library. If you need these, register a custom type
   and choose the correct C++ data structure yourself. These are:
   * `data` and `datetime`: With C++ lacking standardization of these types and
@@ -30,6 +30,8 @@ schema and data:
     these.
   * `binary`: There is no sensible C++ equivalent of a Python bytes object, so
     it seems wise to skip on this one.
+  * `set`: This type seems to be inaccessible when starting from serialized YAML.
+    I am currently not planning to add this.
 * The `regex` rule is not guaranteed to accept exactly the same dialect of
   regular expressions as in the Python package. Currently, the C++ implementation
   uses plain `std::regex`. Maybe this can be fixed by picking the correct grammar
@@ -76,7 +78,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] required
   * [x] schema (dict)
   * [x] schema (list)
-  * [ ] type
+  * [x] type
     *  [x] integer
     *  [x] float
     *  [x] string
@@ -87,7 +89,7 @@ This is the roadmap towards cerberus feature completeness:
     *  [x] datetime
     *  [x] dict
     *  [x] list
-    *  [ ] set
+    *  [x] set
   * [x] valuesrules
 * Normalization Rules
   * [ ] Renaming
