@@ -52,6 +52,13 @@ namespace Cerberus {
     LIST = 2
   };
 
+  enum class RulePriority
+  {
+    NORMALIZATION = 0,
+    VALIDATION = 1,
+    TYPECHECKING = 2
+  };
+
   struct TypeItemBase
   {
     virtual bool is_convertible(const YAML::Node&) const = 0;
@@ -272,7 +279,8 @@ namespace Cerberus {
           else
             if (!v.validator.typesmapping[type]->is_convertible(data))
               v.raiseError({"Error in type rule"});
-        }
+        },
+        RulePriority::TYPECHECKING
       );
 
       registerRule(
@@ -316,9 +324,7 @@ namespace Cerberus {
 
           if(subrule == SchemaRuleType::DICT)
           {
-            ValidationState vnew(v);
-            vnew.document = data;
-            vnew.validate(schema);
+            v.validate(schema);
           }
           if(subrule == SchemaRuleType::LIST)
           {
@@ -354,10 +360,10 @@ namespace Cerberus {
       // Normalization rules
       registerNormalizationRule(
         YAML::Load("default: {}"),
-        [](ValidationState&, const YAML::Node& schema, YAML::Node& data)
+        [](ValidationState& v, const YAML::Node& schema, YAML::Node& data)
         {
-          if(data.IsNull())
-            data = schema;
+          if(!data.IsDefined())
+            v.document = schema;
         }
       );
 
@@ -375,10 +381,10 @@ namespace Cerberus {
     }
 
     template<typename Rule>
-    void registerRule(const YAML::Node& schema, Rule&& rule)
+    void registerRule(const YAML::Node& schema, Rule&& rule, RulePriority priority = RulePriority::VALIDATION)
     {
       schema_schema[schema.begin()->first] = schema.begin()->second;
-      rulemapping[schema.begin()->first.as<std::string>()] = std::forward<Rule>(rule);
+      rulemapping[schema.begin()->first.as<std::string>()] = std::make_pair(priority, std::forward<Rule>(rule));
     }
 
     template<typename Rule>
@@ -395,12 +401,12 @@ namespace Cerberus {
 
     bool validate(const YAML::Node& data, const YAML::Node& schema)
     {
-      // Validate the schema first
-      state.errors->clear();
-      state.document = YAML::Clone(schema);
-      state.validate(schema_schema);
-      if(!state.errors->empty())
-        throw SchemaError(state);
+      // // Validate the schema first
+      // state.errors->clear();
+      // state.document = YAML::Clone(schema);
+      // state.validate(schema_schema);
+      // if(!state.errors->empty())
+      //   throw SchemaError(state);
 
       state.errors->clear();
       state.document = YAML::Clone(data);
@@ -449,16 +455,17 @@ namespace Cerberus {
         {
           auto rule = ruleval.first.as<std::string>();
           if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
-            validator.normalizationmapping[rule](*this, ruleval.second, data);
+            validator.normalizationmapping[rule](*this, ruleval.second, document);
         }
 
         // Apply validation rules
-        for(auto ruleval : schema)
-        {
-          auto rule = ruleval.first.as<std::string>();
-          if(validator.rulemapping.find(rule) != validator.rulemapping.end())
-            validator.rulemapping[rule](*this, ruleval.second, data);
-        }
+        for(const auto priority : { RulePriority::VALIDATION, RulePriority::TYPECHECKING })
+          for(auto ruleval : schema)
+          {
+            auto rule = validator.rulemapping.find(ruleval.first.as<std::string>());
+            if((rule != validator.rulemapping.end()) && (rule->second.first == priority))
+              rule->second.second(*this, ruleval.second, document);
+          }
 
         schema_stack->pop_back();
       }
@@ -474,12 +481,10 @@ namespace Cerberus {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
 
-          YAML::Node subdata;
-          if (auto d = document[field])
-            subdata = d;
-
-          validateItem(rules, subdata);
-          document[field] = subdata;
+          ValidationState vnew(*this);
+          vnew.document = document[field];
+          vnew.validateItem(rules, vnew.document);
+          document[field] = vnew.document;
         }
 
         schema_stack->pop_back();
@@ -514,7 +519,7 @@ namespace Cerberus {
     // * The schema entry
     // * The data
     // * The normalized return data
-    std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&)>> rulemapping;
+    std::map<std::string, std::pair<RulePriority, std::function<void(ValidationState&, const YAML::Node&, const YAML::Node&)>>> rulemapping;
     std::map<std::string, std::function<void(ValidationState&, const YAML::Node&, YAML::Node&)>> normalizationmapping;
     std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
