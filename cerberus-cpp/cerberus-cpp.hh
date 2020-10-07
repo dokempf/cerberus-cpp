@@ -358,13 +358,14 @@ namespace Cerberus {
 
 
       // Normalization rules
-      registerNormalizationRule(
+      registerRule(
         YAML::Load("default: {}"),
         [](ValidationState& v, const YAML::Node& schema)
         {
           if(!v.document.IsDefined())
             v.document = schema;
-        }
+        },
+        RulePriority::NORMALIZATION
       );
 
       // Populate the types map
@@ -385,13 +386,6 @@ namespace Cerberus {
     {
       schema_schema[schema.begin()->first] = schema.begin()->second;
       rulemapping[schema.begin()->first.as<std::string>()] = std::make_pair(priority, std::forward<Rule>(rule));
-    }
-
-    template<typename Rule>
-    void registerNormalizationRule(const YAML::Node& schema, Rule&& rule)
-    {
-      schema_schema[schema.begin()->first] = schema.begin()->second;
-      normalizationmapping[schema.begin()->first.as<std::string>()] = std::forward<Rule>(rule);
     }
 
     bool validate(const YAML::Node& data)
@@ -450,16 +444,10 @@ namespace Cerberus {
       {
         schema_stack->push_back(schema);
 
-        // Apply normalization rules
-        for(auto ruleval : schema)
-        {
-          auto rule = ruleval.first.as<std::string>();
-          if(validator.normalizationmapping.find(rule) != validator.normalizationmapping.end())
-            validator.normalizationmapping[rule](*this, ruleval.second);
-        }
-
         // Apply validation rules
-        for(const auto priority : { RulePriority::VALIDATION, RulePriority::TYPECHECKING })
+        for(const auto priority : { RulePriority::NORMALIZATION,
+                                    RulePriority::VALIDATION,
+                                    RulePriority::TYPECHECKING })
           for(auto ruleval : schema)
           {
             auto rule = validator.rulemapping.find(ruleval.first.as<std::string>());
@@ -515,12 +503,7 @@ namespace Cerberus {
     YAML::Node schema_;
     ValidationState state;
 
-    // The registered rules: The arguments these functions take are in this order
-    // * The schema entry
-    // * The data
-    // * The normalized return data
     std::map<std::string, std::pair<RulePriority, std::function<void(ValidationState&, const YAML::Node&)>>> rulemapping;
-    std::map<std::string, std::function<void(ValidationState&, const YAML::Node&)>> normalizationmapping;
     std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
     // The schema that is used to validate user provided schemas.
