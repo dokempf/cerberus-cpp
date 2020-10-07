@@ -109,12 +109,12 @@ namespace Cerberus {
           "allowed:\n"
           "  type: list\n"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
           bool found = false;
-          for(auto item: schema)
+          for(auto item: v.getSchema())
             if (type->equality(item, v.document))
               found = true;
           
@@ -128,11 +128,11 @@ namespace Cerberus {
           "forbidden:\n"
           "  type: list"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
-          for(auto item: schema)
+          for(auto item: v.getSchema())
             if (type->equality(item, v.document))
               v.raiseError({"Forbidden-Rule violated: " + item.as<std::string>()});
         }
@@ -143,11 +143,11 @@ namespace Cerberus {
           "items:\n"
           "  type: list"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
-          auto schemait = schema.begin();
+          auto schemait = v.getSchema().begin();
           auto datait = v.document.begin();
-          while (schemait != schema.end())
+          while (schemait != v.getSchema().end())
           {
             ValidationState vnew(v);
             vnew.document = YAML::Clone(*(datait++));
@@ -161,42 +161,42 @@ namespace Cerberus {
           "keysrules:\n"
           "  type: dict"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           ValidationState vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.first);
-            vnew.validateItem(schema, vnew.document);
+            vnew.validateItem(v.getSchema(), vnew.document);
           }
         }
       );
 
       registerRule(
         YAML::Load("meta: {}"),
-        [](ValidationState&, const YAML::Node&){}
+        [](ValidationState&){}
       );
 
       registerRule(
         YAML::Load("max: {}"),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
 
-          if((type->less(schema, v.document)) || (type->equality(v.document, schema)))
+          if((type->less(v.getSchema(), v.document)) || (type->equality(v.document, v.getSchema())))
             v.raiseError({"Max-Rrule violated!"});
         }
       );
 
       registerRule(
         YAML::Load("min: {}"),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           // Extract type information from the larger schema
           auto type = v.extractType();
 
-          if(!(type->less(schema, v.document)))
+          if(!(type->less(v.getSchema(), v.document)))
             v.raiseError({"Min-Rule violated!"});
         }
       );
@@ -207,7 +207,7 @@ namespace Cerberus {
           "  type: integer \n"
           "  min: 1"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           if(!((v.document.IsSequence()) || (v.document.IsMap())))
             v.raiseError({"Maxlength-Rule applied to non-iterable data container!"});
@@ -216,7 +216,7 @@ namespace Cerberus {
             unsigned int count = 0;
             for(auto item: v.document)
               ++count;
-            if(count > schema.as<int>())
+            if(count > v.getSchema().as<int>())
               v.raiseError({"Maxlength-Rule violated!"});
           }
         }
@@ -228,7 +228,7 @@ namespace Cerberus {
           "  type: integer \n"
           "  min: 0"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           if(!((v.document.IsSequence()) || (v.document.IsMap())))
             v.raiseError({"Minlength-Rule applied to non-iterable data container!"});
@@ -237,7 +237,7 @@ namespace Cerberus {
             unsigned int count = 0;
             for(auto item: v.document)
               ++count;
-            if(count < schema.as<int>())
+            if(count < v.getSchema().as<int>())
               v.raiseError({"Minlength-Rule violated!"});
           }
         }
@@ -248,9 +248,9 @@ namespace Cerberus {
           "regex: \n"
           "  type: string"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
-          if(!std::regex_match(v.document.as<std::string>(), std::regex(schema.as<std::string>())))
+          if(!std::regex_match(v.document.as<std::string>(), std::regex(v.getSchema().as<std::string>())))
             v.raiseError({"Regex-Rule violated!"});
         }
       );
@@ -260,12 +260,12 @@ namespace Cerberus {
           "type: \n"
           "  type: string"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           if(v.document.IsNull())
             return;
 
-          auto type = schema.as<std::string>();
+          auto type = v.getSchema().as<std::string>();
           if (type == "list")
           {
             if(!v.document.IsSequence())
@@ -288,9 +288,9 @@ namespace Cerberus {
           "required:\n"
           "  type: boolean"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
-          if((schema.as<bool>()) && (v.document.IsNull()))
+          if((v.getSchema().as<bool>()) && (v.document.IsNull()))
             v.raiseError({"Error: Missing required field!"});
         }
       );
@@ -300,12 +300,12 @@ namespace Cerberus {
           "schema:       \n"
           "  type: dict    "
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           // Detect whether this is the schema(list) or schema(dict) rule by investigating
           // either the type information explicitly given or looking at the given data
           SchemaRuleType subrule = SchemaRuleType::UNSUPPORTED;
-          auto typenode = v.schema_stack->back()["type"];
+          auto typenode = v.getSchema(1)["type"];
           if(typenode)
           {
             auto type = typenode.as<std::string>();
@@ -324,7 +324,7 @@ namespace Cerberus {
 
           if(subrule == SchemaRuleType::DICT)
           {
-            v.validate(schema);
+            v.validate(v.getSchema());
           }
           if(subrule == SchemaRuleType::LIST)
           {
@@ -332,7 +332,7 @@ namespace Cerberus {
             for(auto item: v.document)
             {
              vnew.document = YAML::Clone(item);
-             vnew.validateItem(schema, vnew.document);
+             vnew.validateItem(v.getSchema(), vnew.document);
             }
           }
           if(subrule == SchemaRuleType::UNSUPPORTED)
@@ -345,13 +345,13 @@ namespace Cerberus {
           "valuesrules:\n"
           "  type: dict"
         ),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           ValidationState vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.second);
-            vnew.validateItem(schema, vnew.document);
+            vnew.validateItem(v.getSchema(), vnew.document);
           }
         }
       );
@@ -360,10 +360,10 @@ namespace Cerberus {
       // Normalization rules
       registerRule(
         YAML::Load("default: {}"),
-        [](ValidationState& v, const YAML::Node& schema)
+        [](ValidationState& v)
         {
           if(!v.document.IsDefined())
-            v.document = schema;
+            v.document = v.getSchema();
         },
         RulePriority::NORMALIZATION
       );
@@ -452,7 +452,11 @@ namespace Cerberus {
           {
             auto rule = validator.rulemapping.find(ruleval.first.as<std::string>());
             if((rule != validator.rulemapping.end()) && (rule->second.first == priority))
-              rule->second.second(*this, ruleval.second);
+            {
+              schema_stack->push_back(ruleval.second);
+              rule->second.second(*this);
+              schema_stack->pop_back();
+            }
           }
 
         schema_stack->pop_back();
@@ -490,8 +494,13 @@ namespace Cerberus {
 
       const std::shared_ptr<TypeItemBase>& extractType()
       {
-        auto type = schema_stack->back()["type"].as<std::string>();
+        auto type = getSchema(1)["type"].as<std::string>();
         return validator.typesmapping[type];
+      }
+
+      const YAML::Node& getSchema(std::size_t index = 0) const
+      {
+        return *(schema_stack->rbegin() + index);
       }
 
       Validator& validator;
@@ -503,7 +512,7 @@ namespace Cerberus {
     YAML::Node schema_;
     ValidationState state;
 
-    std::map<std::string, std::pair<RulePriority, std::function<void(ValidationState&, const YAML::Node&)>>> rulemapping;
+    std::map<std::string, std::pair<RulePriority, std::function<void(ValidationState&)>>> rulemapping;
     std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
     // The schema that is used to validate user provided schemas.
