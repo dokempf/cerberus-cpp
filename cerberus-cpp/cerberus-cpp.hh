@@ -372,6 +372,7 @@ namespace Cerberus {
       registerType<long long>("integer");
       registerType<std::string>("string");
       registerType<long double>("float");
+      registerType<long double>("number");
       registerType<bool>("boolean");
     }
 

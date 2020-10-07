@@ -81,12 +81,12 @@ This is the roadmap towards cerberus feature completeness:
     *  [x] float
     *  [x] string
     *  [x] boolean
-    *  [ ] number
+    *  [x] number
     *  [x] binary
     *  [x] date
     *  [x] datetime
     *  [x] dict
-    *  [ ] list
+    *  [x] list
     *  [ ] set
   * [x] valuesrules
 * Normalization Rules
