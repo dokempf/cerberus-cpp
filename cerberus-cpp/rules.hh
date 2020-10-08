@@ -3,20 +3,58 @@
 
 #include<yaml-cpp/yaml.h>
 
+#include<memory>
 #include<regex>
 #include<string>
+#include<vector>
+
+#include<iostream>
 
 namespace Cerberus {
 
   enum class RulePriority
   {
-    NORMALIZATION = 0,
-    VALIDATION = 1,
-    TYPECHECKING = 2
+    FIRST = 0,
+    NORMALIZATION = 1,
+    VALIDATION = 2,
+    TYPECHECKING = 3,
+    LAST = 4
   };
 
   namespace impl {
     
+    template<typename Validator>
+    void allow_unknown_rule(Validator& validator)
+    {
+      auto state = std::make_shared<std::vector<bool>>();
+
+      validator.registerRule(
+        YAML::Load(
+          "allow_unknown:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          state->push_back(v.allow_unknown);
+          v.allow_unknown = v.getSchema().template as<bool>();
+        },
+        RulePriority::FIRST
+      );
+
+      validator.registerRule(
+        YAML::Load(
+          "allow_unknown:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          v.allow_unknown = state->back();
+          state->pop_back();
+        },
+        RulePriority::LAST
+      );
+    }
+
     template<typename Validator>
     void allowed_rule(Validator& validator)
     {
@@ -385,6 +423,7 @@ namespace Cerberus {
   template<typename Validator>
   void registerBuiltinRules(Validator& v)
   {
+    impl::allow_unknown_rule(v);
     impl::allowed_rule(v);
     impl::contains_rule(v);
     impl::default_rule(v);

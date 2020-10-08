@@ -61,6 +61,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] Validation of schemas against Schema Schema
 * Validation Rules
   * [x] allof
+  * [x] allow_unknown
   * [x] allowed
   * [x] anyof
   * [x] check_with

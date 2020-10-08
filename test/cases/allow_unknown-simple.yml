@@ -1,0 +1,11 @@
+schema:
+  field:
+    type: dict
+    schema:
+      sub:
+        type: string
+    allow_unknown: true
+data:
+  field:
+    sub: abc
+    other: def

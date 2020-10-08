@@ -43,7 +43,7 @@ namespace Cerberus {
     void registerRule(const YAML::Node& schema, Rule&& rule, RulePriority priority = RulePriority::VALIDATION)
     {
       schema_schema[schema.begin()->first] = schema.begin()->second;
-      rulemapping[schema.begin()->first.as<std::string>()] = std::make_pair(priority, std::forward<Rule>(rule));
+      rulemapping[std::make_pair(priority, schema.begin()->first.as<std::string>())] = std::forward<Rule>(rule);
     }
 
     void setAllowUnknown(bool value)
@@ -104,16 +104,18 @@ namespace Cerberus {
         schema_stack.push_back(schema);
 
         // Apply validation rules
-        for(const auto priority : { RulePriority::NORMALIZATION,
+        for(const auto priority : { RulePriority::FIRST,
+                                    RulePriority::NORMALIZATION,
                                     RulePriority::VALIDATION,
-                                    RulePriority::TYPECHECKING })
+                                    RulePriority::TYPECHECKING,
+                                    RulePriority::LAST })
           for(auto ruleval : schema)
           {
-            auto rule = validator.rulemapping.find(ruleval.first.as<std::string>());
-            if((rule != validator.rulemapping.end()) && (rule->second.first == priority))
+            auto rule = validator.rulemapping.find(std::make_pair(priority, ruleval.first.as<std::string>()));
+            if(rule != validator.rulemapping.end())
             {
               schema_stack.push_back(ruleval.second);
-              rule->second.second(*this);
+              rule->second(*this);
               schema_stack.pop_back();
             }
           }
@@ -199,7 +201,7 @@ namespace Cerberus {
     YAML::Node schema_;
     RecursiveValidator state;
 
-    std::map<std::string, std::pair<RulePriority, std::function<void(RecursiveValidator&)>>> rulemapping;
+    std::map<std::pair<RulePriority, std::string>, std::function<void(RecursiveValidator&)>> rulemapping;
     std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
 
     // The schema that is used to validate user provided schemas.
