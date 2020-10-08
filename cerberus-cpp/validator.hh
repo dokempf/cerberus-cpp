@@ -159,9 +159,9 @@ namespace Cerberus {
         return validator.typesmapping[type];
       }
 
-      const YAML::Node& getSchema(std::size_t index = 0) const
+      const YAML::Node& getSchema(std::size_t level = 0) const
       {
-        return *(schema_stack->rbegin() + index);
+        return *(schema_stack->rbegin() + level);
       }
 
       Validator& validator;

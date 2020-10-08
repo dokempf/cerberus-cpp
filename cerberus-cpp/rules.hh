@@ -28,7 +28,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType();
+          auto type = v.extractType(1);
           bool found = false;
           for(auto item: v.getSchema())
             if (type->equality(item, v.document))
@@ -100,7 +100,7 @@ namespace Cerberus {
         [](auto& v)
         {
           for(auto item: v.getSchema())
-            if (v.extractType()->equality(item, v.document))
+            if (v.extractType(1)->equality(item, v.document))
               v.raiseError({"Forbidden-Rule violated: " + item.template as<std::string>()});
         }
       );
@@ -120,7 +120,7 @@ namespace Cerberus {
           auto datait = v.document.begin();
           while (schemait != v.getSchema().end())
           {
-            decltype(v) vnew(v);
+            typename std::decay<decltype(v)>::type vnew(v);
             vnew.document = YAML::Clone(*(datait++));
             vnew.validateItem(*(schemait++), vnew.document);
           }
@@ -138,7 +138,7 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          decltype(v) vnew(v);
+          typename std::decay<decltype(v)>::type vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.first);
@@ -165,7 +165,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType();
+          auto type = v.extractType(1);
 
           if((type->less(v.getSchema(), v.document)) || (type->equality(v.document, v.getSchema())))
             v.raiseError({"Max-Rrule violated!"});
@@ -181,7 +181,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType();
+          auto type = v.extractType(1);
 
           if(!(type->less(v.getSchema(), v.document)))
             v.raiseError({"Min-Rule violated!"});
@@ -273,14 +273,14 @@ namespace Cerberus {
           {
             if(!v.document.IsSequence())
               v.raiseError({"Expecting a list"});
-          }
+            }
           else if(type == "dict")
           {
             if(!v.document.IsMap())
               v.raiseError({"Expecting a map"});
           }
           else
-            if (!v.extractType()->is_convertible(v.document))
+            if (!v.extractType(type)->is_convertible(v.document))
               v.raiseError({"Error in type rule"});
         },
         RulePriority::TYPECHECKING
@@ -346,7 +346,7 @@ namespace Cerberus {
           }
           if(subrule == SchemaRuleType::LIST)
           {
-            decltype(v) vnew(v);
+            typename std::decay<decltype(v)>::type vnew(v);
             for(auto item: v.document)
             {
              vnew.document = YAML::Clone(item);
@@ -369,7 +369,7 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          decltype(v) vnew(v);
+          typename std::decay<decltype(v)>::type vnew(v);
           for(auto item: v.document)
           {
             vnew.document = YAML::Clone(item.second);
