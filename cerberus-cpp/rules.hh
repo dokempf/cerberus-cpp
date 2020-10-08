@@ -120,9 +120,9 @@ namespace Cerberus {
           auto datait = v.getDocument().begin();
           while (schemait != v.getSchema().end())
           {
-            v.document_stack->push_back(*(datait++));
+            v.document_stack.push_back(*(datait++));
             v.validateItem(*(schemait++));
-            v.document_stack->pop_back();
+            v.document_stack.pop_back();
           }
         }
       );
@@ -140,9 +140,9 @@ namespace Cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack->push_back(item.first);
+            v.document_stack.push_back(item.first);
             v.validateItem(v.getSchema());
-            v.document_stack->pop_back();
+            v.document_stack.pop_back();
           }
         }
       );
@@ -348,9 +348,9 @@ namespace Cerberus {
           {
             for(auto item: v.getDocument())
             {
-              v.document_stack->push_back(item);
+              v.document_stack.push_back(item);
               v.validateItem(v.getSchema());
-              v.document_stack->pop_back();
+              v.document_stack.pop_back();
             }
 
           }
@@ -372,9 +372,9 @@ namespace Cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack->push_back(item.second);;
+            v.document_stack.push_back(item.second);;
             v.validateItem(v.getSchema());
-            v.document_stack->pop_back();
+            v.document_stack.pop_back();
           }
         }
       );
