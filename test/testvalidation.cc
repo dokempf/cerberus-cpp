@@ -1,4 +1,4 @@
-#include<cerberus-cpp/cerberus-cpp.hh>
+#include<cerberus-cpp/validator.hh>
 #include<yaml-cpp/yaml.h>
 
 #include<iostream>
