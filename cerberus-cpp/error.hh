@@ -34,6 +34,7 @@ namespace Cerberus {
 
   struct ValidationErrorItem
   {
+    std::string path;
     std::string message;
   };
 

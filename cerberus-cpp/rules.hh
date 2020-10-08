@@ -35,7 +35,7 @@ namespace Cerberus {
               found = true;
           
           if(!found)
-            v.raiseError({"Value disallowed by Allowed-Rule!"});
+            v.raiseError("Value disallowed by Allowed-Rule!");
         }
       ); 
     }
@@ -57,7 +57,7 @@ namespace Cerberus {
               needed.push_back(item);
           else
           {
-            v.raiseError({"Contains-Rule expects value or list!"});
+            v.raiseError("Contains-Rule expects value or list!");
             return;
           }
           
@@ -69,7 +69,7 @@ namespace Cerberus {
                 ++it;
 
           if(!needed.empty())
-            v.raiseError({"Contains-Rule violated"});
+            v.raiseError("Contains-Rule violated");
         }
       );
     }
@@ -101,7 +101,7 @@ namespace Cerberus {
         {
           for(auto item: v.getSchema())
             if (v.extractType(1)->equality(item, v.getDocument()))
-              v.raiseError({"Forbidden-Rule violated: " + item.template as<std::string>()});
+              v.raiseError("Forbidden-Rule violated: " + item.template as<std::string>());
         }
       );
     }
@@ -168,7 +168,7 @@ namespace Cerberus {
           auto type = v.extractType(1);
 
           if((type->less(v.getSchema(), v.getDocument())) || (type->equality(v.getDocument(), v.getSchema())))
-            v.raiseError({"Max-Rrule violated!"});
+            v.raiseError("Max-Rrule violated!");
         }
       );
     }
@@ -184,7 +184,7 @@ namespace Cerberus {
           auto type = v.extractType(1);
 
           if(!(type->less(v.getSchema(), v.getDocument())))
-            v.raiseError({"Min-Rule violated!"});
+            v.raiseError("Min-Rule violated!");
         }
       );
     }
@@ -201,14 +201,14 @@ namespace Cerberus {
         [](auto& v)
         {
           if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError({"Maxlength-Rule applied to non-iterable data container!"});
+            v.raiseError("Maxlength-Rule applied to non-iterable data container!");
           else
           {
             unsigned int count = 0;
             for(auto item: v.getDocument())
               ++count;
             if(count > v.getSchema().template as<int>())
-              v.raiseError({"Maxlength-Rule violated!"});
+              v.raiseError("Maxlength-Rule violated!");
           }
         }
       );
@@ -226,14 +226,14 @@ namespace Cerberus {
         [](auto& v)
         {
           if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError({"Minlength-Rule applied to non-iterable data container!"});
+            v.raiseError("Minlength-Rule applied to non-iterable data container!");
           else
           {
             unsigned int count = 0;
             for(auto item: v.getDocument())
               ++count;
             if(count < v.getSchema().template as<int>())
-              v.raiseError({"Minlength-Rule violated!"});
+              v.raiseError("Minlength-Rule violated!");
           }
         }
       );
@@ -250,7 +250,7 @@ namespace Cerberus {
         [](auto& v)
         {
           if(!std::regex_match(v.getDocument().template as<std::string>(), std::regex(v.getSchema().template as<std::string>())))
-            v.raiseError({"Regex-Rule violated!"});
+            v.raiseError("Regex-Rule violated!");
         }
       );
     }
@@ -272,16 +272,16 @@ namespace Cerberus {
           if (type == "list")
           {
             if(!v.getDocument().IsSequence())
-              v.raiseError({"Expecting a list"});
+              v.raiseError("Expecting a list");
             }
           else if(type == "dict")
           {
             if(!v.getDocument().IsMap())
-              v.raiseError({"Expecting a map"});
+              v.raiseError("Expecting a map");
           }
           else
             if (!v.extractType(type)->is_convertible(v.getDocument()))
-              v.raiseError({"Error in type rule"});
+              v.raiseError("Type-Rule violated");
         },
         RulePriority::TYPECHECKING
       );
@@ -298,7 +298,7 @@ namespace Cerberus {
         [](auto& v)
         {
           if((v.getSchema().template as<bool>()) && (v.getDocument().IsNull()))
-            v.raiseError({"Error: Missing required field!"});
+            v.raiseError("Required-Rule violated!");
         }
       );
     }
@@ -346,16 +346,16 @@ namespace Cerberus {
           }
           if(subrule == SchemaRuleType::LIST)
           {
-            for(auto item: v.getDocument())
+            for(std::size_t counter = 0; counter < v.getDocument().size(); ++counter)
             {
-              v.document_stack.push_back(item);
+              v.document_stack.pushListItem(counter);
               v.validateItem(v.getSchema());
-              v.document_stack.pop_back();
+              v.document_stack.pop();
             }
 
           }
           if(subrule == SchemaRuleType::UNSUPPORTED)
-            v.raiseError({"Schema-Rule is only available for type=dict|list"});
+            v.raiseError("Schema-Rule is only available for type=dict|list");
         }
       );
     }

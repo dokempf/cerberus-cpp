@@ -9,7 +9,9 @@
 #include<yaml-cpp/yaml.h>
 
 #include<functional>
+#include<iostream>
 #include<map>
+#include<memory>
 #include<string>
 #include<tuple>
 
@@ -86,9 +88,9 @@ namespace Cerberus {
       // We prohibit copies of the recursive validator. They would only create a mess!
       RecursiveValidator(const RecursiveValidator&) = delete;
 
-      void raiseError(ValidationErrorItem error)
+      void raiseError(const std::string& error)
       {
-        errors.push_back(error);
+        errors.push_back({document_stack.stringPath(), error});
       }
 
       void validateItem(const YAML::Node& schema)
@@ -124,10 +126,10 @@ namespace Cerberus {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
 
-          document_stack.push_back(getDocument()[field]);
+          document_stack.pushDictItem(field);
           validateItem(rules);
           getDocument(1)[field] = getDocument();
-          document_stack.pop_back();
+          document_stack.pop();
         }
 
         schema_stack.pop_back();
@@ -140,7 +142,10 @@ namespace Cerberus {
       void printErrors(Stream& stream) const
       {
         for(auto error: errors)
-          stream << error.message << std::endl;
+        {
+          stream << "Error validating data field " << error.path << std::endl;
+          stream << "Message: " << error.message << std::endl;
+        }
       }
 
       const std::shared_ptr<TypeItemBase>& extractType(const std::string& name)
@@ -156,18 +161,17 @@ namespace Cerberus {
 
       const YAML::Node& getSchema(std::size_t level = 0) const
       {
-        return *(schema_stack.rbegin() + level);
+        return schema_stack.get(level);
       }
 
       YAML::Node& getDocument(std::size_t level = 0)
       {
-        return *(document_stack.rbegin() + level);
+        return document_stack.get(level);
       }
 
-      void setDocument(YAML::Node& document)
+      void setDocument(const YAML::Node& document)
       {
-        document_stack.clear();
-        document_stack.push_back(document);
+        document_stack.reset(document);
       }
 
       Validator& validator;
