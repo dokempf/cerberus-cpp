@@ -28,7 +28,7 @@ namespace Cerberus {
 
     virtual std::string stringify(const std::string& prefix) const override
     {
-      return prefix + ((prefix != "") ? "." : "") + key;
+      return prefix + ((prefix != "^") ? "." : "") + key;
     }
      
     private:
@@ -93,7 +93,7 @@ namespace Cerberus {
 
     std::string stringPath() const
     {
-      std::string result = "";
+      std::string result = "^";
       for (auto element: path)
         result = element->stringify(result);
       return result;

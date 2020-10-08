@@ -46,6 +46,11 @@ namespace Cerberus {
       rulemapping[schema.begin()->first.as<std::string>()] = std::make_pair(priority, std::forward<Rule>(rule));
     }
 
+    void setAllowUnknown(bool value)
+    {
+      state.allow_unknown = value;
+    }
+
     bool validate(const YAML::Node& data)
     {
       return validate(data, schema_);
@@ -83,6 +88,7 @@ namespace Cerberus {
     {
       RecursiveValidator(Validator& validator)
         : validator(validator)
+        , allow_unknown(false)
       {}
 
       // We prohibit copies of the recursive validator. They would only create a mess!
@@ -121,15 +127,24 @@ namespace Cerberus {
         schema_stack.push_back(schema);
 
         // Perform validation
+        std::vector<std::string> found;
         for(auto fieldrules : schema)
         {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
+          found.push_back(field);
 
           document_stack.pushDictItem(field);
           validateItem(rules);
           getDocument(1)[field] = getDocument();
           document_stack.pop();
+        }
+
+        if(!allow_unknown)
+        {
+          for(auto item: getDocument())
+            if(std::find(found.begin(), found.end(), item.first.as<std::string>()) == found.end())
+                raiseError("Unknown item found in validator that does not accept unknown items: " + item.first.as<std::string>());
         }
 
         schema_stack.pop_back();
@@ -178,6 +193,7 @@ namespace Cerberus {
       DocumentStack schema_stack;
       DocumentStack document_stack;
       std::vector<ValidationErrorItem> errors;
+      bool allow_unknown;
     };
 
     YAML::Node schema_;
