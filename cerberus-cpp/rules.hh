@@ -31,7 +31,7 @@ namespace Cerberus {
           auto type = v.extractType(1);
           bool found = false;
           for(auto item: v.getSchema())
-            if (type->equality(item, v.document))
+            if (type->equality(item, v.getDocument()))
               found = true;
           
           if(!found)
@@ -61,7 +61,7 @@ namespace Cerberus {
             return;
           }
           
-          for(auto item: v.document)
+          for(auto item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
               if (v.extractType("string")->equality(*it, item))
                 it = needed.erase(it);
@@ -82,8 +82,8 @@ namespace Cerberus {
         YAML::Load("default: {}"),
         [](auto& v)
         {
-          if(!v.document.IsDefined())
-            v.document = v.getSchema();
+          if(!v.getDocument().IsDefined())
+            v.getDocument() = v.getSchema();
         },
         RulePriority::NORMALIZATION
       );
@@ -100,7 +100,7 @@ namespace Cerberus {
         [](auto& v)
         {
           for(auto item: v.getSchema())
-            if (v.extractType(1)->equality(item, v.document))
+            if (v.extractType(1)->equality(item, v.getDocument()))
               v.raiseError({"Forbidden-Rule violated: " + item.template as<std::string>()});
         }
       );
@@ -117,12 +117,12 @@ namespace Cerberus {
         [](auto& v)
         {
           auto schemait = v.getSchema().begin();
-          auto datait = v.document.begin();
+          auto datait = v.getDocument().begin();
           while (schemait != v.getSchema().end())
           {
-            typename std::decay<decltype(v)>::type vnew(v);
-            vnew.document = YAML::Clone(*(datait++));
-            vnew.validateItem(*(schemait++), vnew.document);
+            v.document_stack->push_back(*(datait++));
+            v.validateItem(*(schemait++));
+            v.document_stack->pop_back();
           }
         }
       );
@@ -138,11 +138,11 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          typename std::decay<decltype(v)>::type vnew(v);
-          for(auto item: v.document)
+          for(auto item: v.getDocument())
           {
-            vnew.document = YAML::Clone(item.first);
-            vnew.validateItem(v.getSchema(), vnew.document);
+            v.document_stack->push_back(item.first);
+            v.validateItem(v.getSchema());
+            v.document_stack->pop_back();
           }
         }
       );
@@ -167,7 +167,7 @@ namespace Cerberus {
           // Extract type information from the larger schema
           auto type = v.extractType(1);
 
-          if((type->less(v.getSchema(), v.document)) || (type->equality(v.document, v.getSchema())))
+          if((type->less(v.getSchema(), v.getDocument())) || (type->equality(v.getDocument(), v.getSchema())))
             v.raiseError({"Max-Rrule violated!"});
         }
       );
@@ -183,7 +183,7 @@ namespace Cerberus {
           // Extract type information from the larger schema
           auto type = v.extractType(1);
 
-          if(!(type->less(v.getSchema(), v.document)))
+          if(!(type->less(v.getSchema(), v.getDocument())))
             v.raiseError({"Min-Rule violated!"});
         }
       );
@@ -200,12 +200,12 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if(!((v.document.IsSequence()) || (v.document.IsMap())))
+          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
             v.raiseError({"Maxlength-Rule applied to non-iterable data container!"});
           else
           {
             unsigned int count = 0;
-            for(auto item: v.document)
+            for(auto item: v.getDocument())
               ++count;
             if(count > v.getSchema().template as<int>())
               v.raiseError({"Maxlength-Rule violated!"});
@@ -225,12 +225,12 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if(!((v.document.IsSequence()) || (v.document.IsMap())))
+          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
             v.raiseError({"Minlength-Rule applied to non-iterable data container!"});
           else
           {
             unsigned int count = 0;
-            for(auto item: v.document)
+            for(auto item: v.getDocument())
               ++count;
             if(count < v.getSchema().template as<int>())
               v.raiseError({"Minlength-Rule violated!"});
@@ -249,7 +249,7 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if(!std::regex_match(v.document.template as<std::string>(), std::regex(v.getSchema().template as<std::string>())))
+          if(!std::regex_match(v.getDocument().template as<std::string>(), std::regex(v.getSchema().template as<std::string>())))
             v.raiseError({"Regex-Rule violated!"});
         }
       );
@@ -265,22 +265,22 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if(v.document.IsNull())
+          if(v.getDocument().IsNull())
             return;
 
           auto type = v.getSchema().template as<std::string>();
           if (type == "list")
           {
-            if(!v.document.IsSequence())
+            if(!v.getDocument().IsSequence())
               v.raiseError({"Expecting a list"});
             }
           else if(type == "dict")
           {
-            if(!v.document.IsMap())
+            if(!v.getDocument().IsMap())
               v.raiseError({"Expecting a map"});
           }
           else
-            if (!v.extractType(type)->is_convertible(v.document))
+            if (!v.extractType(type)->is_convertible(v.getDocument()))
               v.raiseError({"Error in type rule"});
         },
         RulePriority::TYPECHECKING
@@ -297,7 +297,7 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if((v.getSchema().template as<bool>()) && (v.document.IsNull()))
+          if((v.getSchema().template as<bool>()) && (v.getDocument().IsNull()))
             v.raiseError({"Error: Missing required field!"});
         }
       );
@@ -334,9 +334,9 @@ namespace Cerberus {
           }
           else
           {
-            if(v.document.IsMap())
+            if(v.getDocument().IsMap())
               subrule = SchemaRuleType::DICT;
-            if(v.document.IsSequence())
+            if(v.getDocument().IsSequence())
               subrule = SchemaRuleType::LIST;
           }
 
@@ -346,12 +346,13 @@ namespace Cerberus {
           }
           if(subrule == SchemaRuleType::LIST)
           {
-            typename std::decay<decltype(v)>::type vnew(v);
-            for(auto item: v.document)
+            for(auto item: v.getDocument())
             {
-             vnew.document = YAML::Clone(item);
-             vnew.validateItem(v.getSchema(), vnew.document);
+              v.document_stack->push_back(item);
+              v.validateItem(v.getSchema());
+              v.document_stack->pop_back();
             }
+
           }
           if(subrule == SchemaRuleType::UNSUPPORTED)
             v.raiseError({"Schema-Rule is only available for type=dict|list"});
@@ -369,11 +370,11 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          typename std::decay<decltype(v)>::type vnew(v);
-          for(auto item: v.document)
+          for(auto item: v.getDocument())
           {
-            vnew.document = YAML::Clone(item.second);
-            vnew.validateItem(v.getSchema(), vnew.document);
+            v.document_stack->push_back(item.second);;
+            v.validateItem(v.getSchema());
+            v.document_stack->pop_back();
           }
         }
       );

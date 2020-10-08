@@ -3,6 +3,7 @@
 
 #include<cerberus-cpp/error.hh>
 #include<cerberus-cpp/rules.hh>
+#include<cerberus-cpp/stack.hh>
 #include<cerberus-cpp/types.hh>
 
 #include<yaml-cpp/yaml.h>
@@ -59,14 +60,15 @@ namespace Cerberus {
       //   throw SchemaError(state);
 
       state.errors->clear();
-      state.document = YAML::Clone(data);
+      YAML::Node copy = YAML::Clone(data);
+      state.setDocument(copy);
       state.validate(schema);
       return state.errors->empty();
     }
 
-    YAML::Node getDocument() const
+    const YAML::Node& getDocument()
     {
-      return state.document;
+      return state.getDocument();
     }
 
     template<typename Stream>
@@ -80,7 +82,8 @@ namespace Cerberus {
     {
       RecursiveValidator(Validator& validator)
         : validator(validator)
-        , schema_stack(std::make_shared<std::vector<YAML::Node>>())
+        , schema_stack(std::make_shared<DocumentStack>())
+        , document_stack(std::make_shared<DocumentStack>())
         , errors(std::make_shared<std::vector<ValidationErrorItem>>())
       {}
 
@@ -88,6 +91,7 @@ namespace Cerberus {
         : validator(other.validator)
         , document(YAML::Clone(other.document))
         , schema_stack(other.schema_stack)
+        , document_stack(other.document_stack)
         , errors(other.errors)
       {}
 
@@ -96,7 +100,7 @@ namespace Cerberus {
         errors->push_back(error);
       }
 
-      void validateItem(const YAML::Node& schema, YAML::Node& data)
+      void validateItem(const YAML::Node& schema)
       {
         schema_stack->push_back(schema);
 
@@ -129,10 +133,10 @@ namespace Cerberus {
           auto field = fieldrules.first.as<std::string>();
           auto rules = fieldrules.second;
 
-          RecursiveValidator vnew(*this);
-          vnew.document = document[field];
-          vnew.validateItem(rules, vnew.document);
-          document[field] = vnew.document;
+          document_stack->push_back(getDocument()[field]);
+          validateItem(rules);
+          getDocument(1)[field] = getDocument();
+          document_stack->pop_back();
         }
 
         schema_stack->pop_back();
@@ -164,9 +168,21 @@ namespace Cerberus {
         return *(schema_stack->rbegin() + level);
       }
 
+      YAML::Node& getDocument(std::size_t level = 0)
+      {
+        return *(document_stack->rbegin() + level);
+      }
+
+      void setDocument(YAML::Node& document)
+      {
+        document_stack->clear();
+        document_stack->push_back(document);
+      }
+
       Validator& validator;
+      std::shared_ptr<DocumentStack> schema_stack;
+      std::shared_ptr<DocumentStack> document_stack;
       YAML::Node document;
-      std::shared_ptr<std::vector<YAML::Node>> schema_stack;
       std::shared_ptr<std::vector<ValidationErrorItem>> errors;
     };
 
