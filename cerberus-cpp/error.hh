@@ -7,10 +7,16 @@
 
 namespace Cerberus {
 
+  //! A base class for exceptions thrown from Cerberus
   class CerberusError
     : public std::exception
   {};
 
+  /** @brief An exception indicating a faulty schema input
+   * 
+   * This exception is thrown when the schema given to the @c Validator
+   * class was not correct.
+   */
   class SchemaError
     : public CerberusError
   {
@@ -32,6 +38,7 @@ namespace Cerberus {
     const char* message;
   };
 
+  //! A struct representing an error during validation
   struct ValidationErrorItem
   {
     std::string path;

@@ -35,8 +35,8 @@ namespace Cerberus {
         ),
         [state](auto& v)
         {
-          state->push_back(v.allow_unknown);
-          v.allow_unknown = v.getSchema().template as<bool>();
+          state->push_back(v.getAllowUnknown());
+          v.setAllowUnknown(v.getSchema().template as<bool>());
         },
         RulePriority::FIRST
       );
@@ -48,7 +48,7 @@ namespace Cerberus {
         ),
         [state](auto& v)
         {
-          v.allow_unknown = state->back();
+          v.setAllowUnknown(state->back());
           state->pop_back();
         },
         RulePriority::LAST
@@ -66,7 +66,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType(1);
+          auto type = v.getType(1);
           bool found = false;
           for(auto item: v.getSchema())
             if (type->equality(item, v.getDocument()))
@@ -101,7 +101,7 @@ namespace Cerberus {
           
           for(auto item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
-              if (v.extractType("string")->equality(*it, item))
+              if (v.getType("string")->equality(*it, item))
                 it = needed.erase(it);
               else
                 ++it;
@@ -138,7 +138,7 @@ namespace Cerberus {
         [](auto& v)
         {
           for(auto item: v.getSchema())
-            if (v.extractType(1)->equality(item, v.getDocument()))
+            if (v.getType(1)->equality(item, v.getDocument()))
               v.raiseError("Forbidden-Rule violated: " + item.template as<std::string>());
         }
       );
@@ -203,7 +203,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType(1);
+          auto type = v.getType(1);
 
           if((type->less(v.getSchema(), v.getDocument())) || (type->equality(v.getDocument(), v.getSchema())))
             v.raiseError("Max-Rrule violated!");
@@ -219,7 +219,7 @@ namespace Cerberus {
         [](auto& v)
         {
           // Extract type information from the larger schema
-          auto type = v.extractType(1);
+          auto type = v.getType(1);
 
           if(!(type->less(v.getSchema(), v.getDocument())))
             v.raiseError("Min-Rule violated!");
@@ -318,7 +318,7 @@ namespace Cerberus {
               v.raiseError("Expecting a map");
           }
           else
-            if (!v.extractType(type)->is_convertible(v.getDocument()))
+            if (!v.getType(type)->is_convertible(v.getDocument()))
               v.raiseError("Type-Rule violated");
         },
         RulePriority::TYPECHECKING
@@ -380,7 +380,7 @@ namespace Cerberus {
 
           if(subrule == SchemaRuleType::DICT)
           {
-            v.validate(v.getSchema());
+            v.validateDict(v.getSchema());
           }
           if(subrule == SchemaRuleType::LIST)
           {
@@ -420,6 +420,10 @@ namespace Cerberus {
 
   } // namespace impl
 
+  /** @brief Register all the built-in rules from cerberus 
+   * 
+   * This is called from the constructor of the @c Validator class.
+   */
   template<typename Validator>
   void registerBuiltinRules(Validator& v)
   {

@@ -19,6 +19,7 @@ schema and data:
   These are the rules that require equality or comparison to be implemented e.g.:
   * `min` and `max`
   * `allowed`
+  
   Your safest bet is to *always* define the `type` rule.
 * The `allowed` rule does not validate iterables, because that would lead to
   conflicting semantics of the `type` field.
