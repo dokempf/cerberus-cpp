@@ -188,7 +188,10 @@ namespace Cerberus {
       return state.getDocument();
     }
 
-    // TODO THis should be an overload to operator<<
+    /** @brief Print errors to a stream
+     * 
+     * This also accessible through the overloaded stream operator<<.
+     */
     template<typename Stream>
     void printErrors(Stream& stream) const
     {
@@ -311,7 +314,7 @@ namespace Cerberus {
         return errors.empty();
       }
 
-      // TODO: this hsould be an overload to operator<<
+      //! Print errors to a stream
       template<typename Stream>
       void printErrors(Stream& stream) const
       {
@@ -365,13 +368,21 @@ namespace Cerberus {
        * @param level The level of the schema stack that we are interested in.
        *              @c level=0 will deliver the top stack item, a.k.a. the current
        *              document.
+       * @param is_full_schema Whether the returned schema snippet is expected to
+       *                       be a full schema in itself as e.g. required by the
+       *                       @c schema rule. This will involve potential lookup
+       *                       of registered schemas.
        * @returns A reference to the node of the schema that we are currently
        *          validating against. If @c level was given, a schema
        *          further down the stack will be returned.
        */
-      YAML::Node& getSchema(std::size_t level = 0)
+      YAML::Node& getSchema(std::size_t level = 0, bool is_full_schema = false)
       {
-        return schema_stack.get(level);
+        YAML::Node& schema = schema_stack.get(level);
+        if((is_full_schema) && (schema.IsScalar()))
+          return validator.schema_registry[schema.as<std::string>()];
+        else
+          return schema;
       }
 
       /** @brief Get the YAML::Node of the currently validated document
@@ -465,6 +476,13 @@ namespace Cerberus {
     YAML::Node schema_schema;
     bool validate_schema;
   };
+
+  //! overload stream operator for easy printing of errors
+  template<typename Stream>
+  Stream& operator<<(Stream& stream, const Validator& v)
+  {
+    v.printErrors(stream);
+  }
 
 } // namespace Cerberus
 

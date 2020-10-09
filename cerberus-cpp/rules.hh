@@ -159,8 +159,9 @@ namespace Cerberus {
           while (schemait != v.getSchema().end())
           {
             v.document_stack.push_back(*(datait++));
-            YAML::Node item = *(schemait++);
-            v.validateItem(item);
+            v.schema_stack.push_back(*(schemait++));
+            v.validateItem(v.getSchema(0, true));
+            v.schema_stack.pop_back();
             v.document_stack.pop_back();
           }
         }
@@ -387,14 +388,14 @@ namespace Cerberus {
 
           if(subrule == SchemaRuleType::DICT)
           {
-            v.validateDict(v.getSchema());
+            v.validateDict(v.getSchema(0, true));
           }
           if(subrule == SchemaRuleType::LIST)
           {
             for(std::size_t counter = 0; counter < v.getDocument().size(); ++counter)
             {
               v.document_stack.pushListItem(counter);
-              v.validateItem(v.getSchema());
+              v.validateItem(v.getSchema(0, true));
               v.document_stack.pop();
             }
 
@@ -450,7 +451,7 @@ namespace Cerberus {
           for(auto item: v.getDocument())
           {
             v.document_stack.push_back(item.second);;
-            v.validateItem(v.getSchema());
+            v.validateItem(v.getSchema(0, true));
             v.document_stack.pop_back();
           }
         }

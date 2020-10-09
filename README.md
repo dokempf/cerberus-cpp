@@ -58,7 +58,7 @@ schema and data:
 This is the roadmap towards cerberus feature completeness:
 
 * General validation stuff
-  * [ ] Schema registration
+  * [x] Schema registration
   * [x] Validation of schemas against Schema Schema
 * Validation Rules
   * [x] allof
@@ -80,7 +80,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] oneof
   * [x] readonly
   * [x] regex
-  * [ ] require_all
+  * [x] require_all
   * [x] required
   * [x] schema (dict)
   * [x] schema (list)
