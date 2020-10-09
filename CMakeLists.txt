@@ -7,10 +7,8 @@ include(CTest)
 find_package(yaml-cpp REQUIRED)
 find_package(PythonLibs)
 
-# link_libraries(yaml-cpp)
-#include_directories(${yaml-cpp_INCLUDE_DIR})
-
 add_subdirectory(cerberus-cpp)
+add_subdirectory(doc)
 add_subdirectory(test)
 
 include(FeatureSummary)
