@@ -1,0 +1,15 @@
+schema:
+  foo:
+    type: dict
+    require_all: true
+    schema:
+      sub1:
+        type: string
+      sub2:
+        type: string
+  bar:
+    type: string
+data:
+  foo:
+    sub1: bla
+    sub2: laber

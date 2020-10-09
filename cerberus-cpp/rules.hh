@@ -159,7 +159,8 @@ namespace Cerberus {
           while (schemait != v.getSchema().end())
           {
             v.document_stack.push_back(*(datait++));
-            v.validateItem(*(schemait++));
+            YAML::Node item = *(schemait++);
+            v.validateItem(item);
             v.document_stack.pop_back();
           }
         }
@@ -341,7 +342,7 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if((v.getSchema().template as<bool>()) && (v.getDocument().IsNull()))
+          if((v.getSchema().template as<bool>()) && (!v.getDocument().IsDefined()))
             v.raiseError("Required-Rule violated!");
         }
       );

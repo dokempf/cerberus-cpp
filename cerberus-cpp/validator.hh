@@ -119,7 +119,7 @@ namespace Cerberus {
      */
     void setRequireAll(bool value)
     {
-      state.require_all = value;
+      state.setRequireAll(value);
     }
 
     /** @brief Whether schemas given to this Validator should themselves be validated */
@@ -196,6 +196,7 @@ namespace Cerberus {
       ValidationRuleInterface(Validator& validator, const YAML::Node& document)
         : validator(validator)
         , allow_unknown(false)
+        , require_all(false)
       {
         document_stack.reset(YAML::Clone(document));
       }
@@ -224,7 +225,7 @@ namespace Cerberus {
        * 
        * @param schema Will go away in favor of the schema already being pushed on the stack
        */
-      void validateItem(const YAML::Node& schema)
+      void validateItem(YAML::Node& schema)
       {
         schema_stack.push_back(schema);
 
@@ -234,6 +235,11 @@ namespace Cerberus {
                                     RulePriority::VALIDATION,
                                     RulePriority::TYPECHECKING,
                                     RulePriority::LAST })
+        {
+          // Implement the require all policy of the validator
+          if((priority == RulePriority::NORMALIZATION) && (require_all))
+            schema["required"] = "true";
+
           for(auto ruleval : schema)
           {
             auto rule = validator.rulemapping.find(std::make_pair(priority, ruleval.first.as<std::string>()));
@@ -244,6 +250,7 @@ namespace Cerberus {
               schema_stack.pop_back();
             }
           }
+        }
 
         schema_stack.pop_back();
       }
@@ -347,7 +354,7 @@ namespace Cerberus {
        *          validating against. If @c level was given, a schema
        *          further down the stack will be returned.
        */
-      const YAML::Node& getSchema(std::size_t level = 0) const
+      YAML::Node& getSchema(std::size_t level = 0)
       {
         return schema_stack.get(level);
       }
