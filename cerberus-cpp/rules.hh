@@ -300,6 +300,38 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void require_all_rule(Validator& validator)
+    {
+      auto state = std::make_shared<std::vector<bool>>();
+
+      validator.registerRule(
+        YAML::Load(
+          "require_all:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          state->push_back(v.getRequireAll());
+          v.setRequireAll(v.getSchema().template as<bool>());
+        },
+        RulePriority::FIRST
+      );
+
+      validator.registerRule(
+        YAML::Load(
+          "require_all:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          v.setRequireAll(state->back());
+          state->pop_back();
+        },
+        RulePriority::LAST
+      );
+    }
+
+    template<typename Validator>
     void required_rule(Validator& validator)
     {
       validator.registerRule(
@@ -445,6 +477,7 @@ namespace Cerberus {
     impl::maxlength_rule(v);
     impl::minlength_rule(v);
     impl::regex_rule(v);
+    impl::require_all_rule(v);
     impl::required_rule(v);
     impl::schema_rule(v);
     impl::type_rule(v);

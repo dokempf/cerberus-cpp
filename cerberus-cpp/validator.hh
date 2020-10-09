@@ -110,6 +110,18 @@ namespace Cerberus {
       state.setAllowUnknown(value);
     }
 
+    /** @brief Set the validators policy regarding requiring all keys
+     * 
+     * This can be used the change the validator's policy whether all keys
+     * in a document are required, just as if they all had the required rule
+     * applied. For subdocuments, this can be overwritten from the schema by
+     * using the @c require_all validation rule.
+     */
+    void setRequireAll(bool value)
+    {
+      state.require_all = value;
+    }
+
     /** @brief Whether schemas given to this Validator should themselves be validated */
     void setSchemaValidation(bool value)
     {
@@ -378,6 +390,24 @@ namespace Cerberus {
         allow_unknown = value;
       }
 
+      //! Get the validator's policy about requiring all unknown values
+      bool getRequireAll() const
+      {
+        return require_all;
+      }
+
+      /** @brief Sets the validator's behaviour of requiring all keys
+       * 
+       * @param value The new value for the require all policy
+       * 
+       * This is most likely only interesting for the implementation of the @c
+       * require_all rule.
+       */
+      void setRequireAll(bool value)
+      {
+        require_all = value;
+      }
+
       bool success() const
       {
         return errors.empty();
@@ -398,6 +428,7 @@ namespace Cerberus {
       Validator& validator;
       std::vector<ValidationErrorItem> errors;
       bool allow_unknown;
+      bool require_all;
     };
 
     YAML::Node schema_;
