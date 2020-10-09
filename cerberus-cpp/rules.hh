@@ -202,6 +202,9 @@ namespace Cerberus {
         YAML::Load("max: {}"),
         [](auto& v)
         {
+          if(!v.getDocument().IsDefined())
+            return;
+
           // Extract type information from the larger schema
           auto type = v.getType(1);
 
@@ -218,6 +221,9 @@ namespace Cerberus {
         YAML::Load("min: {}"),
         [](auto& v)
         {
+          if(!v.getDocument().IsDefined())
+            return;
+
           // Extract type information from the larger schema
           auto type = v.getType(1);
 
@@ -294,38 +300,6 @@ namespace Cerberus {
     }
 
     template<typename Validator>
-    void type_rule(Validator& validator)
-    {
-      validator.registerRule(
-        YAML::Load(
-          "type: \n"
-          "  type: string"
-        ),
-        [](auto& v)
-        {
-          if(v.getDocument().IsNull())
-            return;
-
-          auto type = v.getSchema().template as<std::string>();
-          if (type == "list")
-          {
-            if(!v.getDocument().IsSequence())
-              v.raiseError("Expecting a list");
-            }
-          else if(type == "dict")
-          {
-            if(!v.getDocument().IsMap())
-              v.raiseError("Expecting a map");
-          }
-          else
-            if (!v.getType(type)->is_convertible(v.getDocument()))
-              v.raiseError("Type-Rule violated");
-        },
-        RulePriority::TYPECHECKING
-      );
-    }
-
-    template<typename Validator>
     void required_rule(Validator& validator)
     {
       validator.registerRule(
@@ -395,6 +369,38 @@ namespace Cerberus {
           if(subrule == SchemaRuleType::UNSUPPORTED)
             v.raiseError("Schema-Rule is only available for type=dict|list");
         }
+      );
+    }
+
+    template<typename Validator>
+    void type_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "type: \n"
+          "  type: string"
+        ),
+        [](auto& v)
+        {
+          if((v.getDocument().IsNull()) || (!v.getDocument().IsDefined()))
+            return;
+
+          auto type = v.getSchema().template as<std::string>();
+          if (type == "list")
+          {
+            if(!v.getDocument().IsSequence())
+              v.raiseError("Expecting a list");
+            }
+          else if(type == "dict")
+          {
+            if(!v.getDocument().IsMap())
+              v.raiseError("Expecting a map");
+          }
+          else
+            if (!v.getType(type)->is_convertible(v.getDocument()))
+              v.raiseError("Type-Rule violated");
+        },
+        RulePriority::TYPECHECKING
       );
     }
 

@@ -34,6 +34,7 @@ namespace Cerberus {
     Validator(const YAML::Node& schema)
       : schema_(schema)
       , state(*this, YAML::Node())
+      , validate_schema(true)
     {
       registerBuiltinRules(*this);
       registerBuiltinTypes(*this);
@@ -109,6 +110,12 @@ namespace Cerberus {
       state.setAllowUnknown(value);
     }
 
+    /** @brief Whether schemas given to this Validator should themselves be validated */
+    void setSchemaValidation(bool value)
+    {
+      validate_schema = value;
+    }
+
     /** @brief Validate a given document
      * 
      * This is one of the end user entrypoints to perform validation.
@@ -131,14 +138,16 @@ namespace Cerberus {
      */
     bool validate(const YAML::Node& document, const YAML::Node& schema)
     {
-      // // Validate the schema first
-      // state.errors->clear();
-      // state.document = YAML::Clone(schema);
-      // state.validate(schema_schema);
-      // if(!state.errors->empty())
-      //   throw SchemaError(state);
+      if(validate_schema)
+      {
+        Validator schema_validator(schema_schema);
+        schema_validator.setSchemaValidation(false);
+        for(auto entries: schema)
+          if(!schema_validator.validate(entries.second))
+            throw SchemaError(schema_validator);
+      }
 
-      state.document_stack.reset(document);
+      state.reset(document);
       state.validateDict(schema);
       return state.success();
     }
@@ -374,6 +383,12 @@ namespace Cerberus {
         return errors.empty();
       }
 
+      void reset(const YAML::Node& document)
+      {
+        errors.clear();
+        document_stack.reset(YAML::Clone(document));
+      }
+
       // TODO: These should move to private. In order to do so, all rules implementations
       //       need to go through one of the above interfaces.
       DocumentStack schema_stack;
@@ -394,6 +409,7 @@ namespace Cerberus {
     // The schema that is used to validate user provided schemas.
     // This is update with snippets as rules are registered
     YAML::Node schema_schema;
+    bool validate_schema;
   };
 
 } // namespace Cerberus
