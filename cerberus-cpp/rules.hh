@@ -128,6 +128,23 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void empty_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "empty:                 \n"
+          "  type: boolean          "
+        ),
+        [](auto& v)
+        {
+          if(v.getDocument().IsSequence())
+            if((!v.getSchema().template as<bool>()) && (v.getDocument().size() == 0))
+              v.raiseError("Empty-Rule violated for sequence");
+        }
+      );
+    }
+
+    template<typename Validator>
     void forbidden_rule(Validator& validator)
     {
       validator.registerRule(
@@ -487,6 +504,7 @@ namespace Cerberus {
     impl::allowed_rule(v);
     impl::contains_rule(v);
     impl::default_rule(v);
+    impl::empty_rule(v);
     impl::forbidden_rule(v);
     impl::items_rule(v);
     impl::keysrules_rule(v);

@@ -68,7 +68,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] check_with
   * [x] contains
   * [ ] dependencies
-  * [ ] empty
+  * [x] empty
   * [ ] excludes
   * [x] forbidden
   * [x] items
