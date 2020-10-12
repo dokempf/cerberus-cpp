@@ -11,6 +11,7 @@ int main(int argc, char** argv)
 
   // Configure the validator with all the given data
   validator.setAllowUnknown(input["allow_unknown"].as<bool>(false));
+  validator.setPurgeUnknown(input["purge_unknown"].as<bool>(false));
   validator.setRequireAll(input["require_all"].as<bool>(false));
   for (auto schema : input["registry"])
     validator.registerSchema(schema.first.as<std::string>(), schema.second);

@@ -320,6 +320,38 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void purge_unknown_rule(Validator& validator)
+    {
+      auto state = std::make_shared<std::vector<bool>>();
+
+      validator.registerRule(
+        YAML::Load(
+          "purge_unknown:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          state->push_back(v.getPurgeUnknown());
+          v.setPurgeUnknown(v.getSchema().template as<bool>());
+        },
+        RulePriority::FIRST
+      );
+
+      validator.registerRule(
+        YAML::Load(
+          "purge_unknown:\n"
+          " type: boolean"
+        ),
+        [state](auto& v)
+        {
+          v.setPurgeUnknown(state->back());
+          state->pop_back();
+        },
+        RulePriority::LAST
+      );
+    }
+
+    template<typename Validator>
     void regex_rule(Validator& validator)
     {
       validator.registerRule(
@@ -513,6 +545,7 @@ namespace Cerberus {
     impl::maxlength_rule(v);
     impl::minlength_rule(v);
     impl::nullable_rule(v);
+    impl::purge_unknown_rule(v);
     impl::regex_rule(v);
     impl::require_all_rule(v);
     impl::required_rule(v);

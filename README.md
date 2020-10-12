@@ -100,7 +100,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] valuesrules
 * Normalization Rules
   * [ ] Renaming
-  * [ ] Purging
+  * [x] Purging
   * [x] Default Values
   * [ ] Value Coercion
 * [ ] Error Handling

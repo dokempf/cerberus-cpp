@@ -135,6 +135,13 @@ namespace Cerberus {
       return result;
     }
 
+    //! Replaces the back node with a new one
+    void replaceBack(const YAML::Node& node)
+    {
+      this->pop_back();
+      this->push_back(node);
+    }
+
     private:
     std::vector<std::shared_ptr<DocumentPathItem>> path;
   };

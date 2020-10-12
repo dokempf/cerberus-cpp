@@ -125,6 +125,20 @@ namespace Cerberus {
       state.setAllowUnknown(value);
     }
 
+    /** @brief Set the validators policy regarding purging unknown values.
+     *
+     * This can be used to change the validator's policy whether it should
+     * purge values that are not explicitly mentioned in the schema. By
+     * default, it does not do so. For subdocuments, this can be
+     * overwritten from the schema by using the @c purge_unknown normalization rule.
+     *
+     * @param value The new value of the purge unknowns policy
+     */
+    void setPurgeUnknown(bool value)
+    {
+      state.setPurgeUnknown(value);
+    }
+
     /** @brief Set the validators policy regarding requiring all keys
      *
      * This can be used the change the validator's policy whether all keys
@@ -220,6 +234,7 @@ namespace Cerberus {
       ValidationRuleInterface(Validator& validator, const YAML::Node& document)
         : validator(validator)
         , allow_unknown(false)
+        , purge_unknown(false)
         , require_all(false)
       {
         document_stack.reset(YAML::Clone(document));
@@ -308,11 +323,19 @@ namespace Cerberus {
           document_stack.pop();
         }
 
+        if((purge_unknown) && (found.size() != getDocument().size()))
+        {
+          YAML::Node newnode;
+          for(auto item : getDocument())
+            if(std::find(found.begin(), found.end(), item.first.as<std::string>()) != found.end())
+              newnode[item.first] = item.second;
+          document_stack.replaceBack(newnode);
+        }
         if(!allow_unknown)
         {
           for(auto item: getDocument())
             if(std::find(found.begin(), found.end(), item.first.as<std::string>()) == found.end())
-                raiseError("Unknown item found in validator that does not accept unknown items: " + item.first.as<std::string>());
+              raiseError("Unknown item found in validator that does not accept unknown items: " + item.first.as<std::string>());
         }
 
         schema_stack.pop_back();
@@ -427,6 +450,24 @@ namespace Cerberus {
       void setAllowUnknown(bool value)
       {
         allow_unknown = value;
+      }      
+      
+      //! Get the validators current policy about purging unknown values
+      bool getPurgeUnknown() const
+      {
+        return purge_unknown;
+      }
+
+      /** @brief Sets the validator's behaviour of purging unknown values
+       *
+       * @param value The new value for the purge unknown policy
+       *
+       * This is most likely only interesting for implementation of the @c
+       * purge_unknown rule.
+       */
+      void setPurgeUnknown(bool value)
+      {
+        purge_unknown = value;
       }
 
       //! Get the validator's policy about requiring all unknown values
@@ -467,6 +508,7 @@ namespace Cerberus {
       Validator& validator;
       std::vector<ValidationErrorItem> errors;
       bool allow_unknown;
+      bool purge_unknown;
       bool require_all;
     };
 
