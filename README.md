@@ -52,6 +52,9 @@ schema and data:
     implement it.
   * `check_with`: In the context of cerberus-cpp, I fail to see how this rule differs
     from applying a custom rule, which you should do in that case.
+  * `coerce`: Similarly to `check_with`, a a custom coercer is not really different
+    from a custom normalization rule. Might add a `coerce` rule later for compatibility
+    with Python cerberus later though.
 
 # Road map
 
@@ -102,7 +105,7 @@ This is the roadmap towards cerberus feature completeness:
   * [ ] Renaming
   * [x] Purging
   * [x] Default Values
-  * [ ] Value Coercion
+  * [x] Value Coercion
 * [ ] Error Handling
 * Customization
   * [ ] Custom error handling
