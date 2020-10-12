@@ -1,0 +1,14 @@
+schema:
+  group:
+    type: dict
+    schema: foo
+registry:
+  foo:
+    user:
+      type: string
+success:
+  - group:
+      user: me
+failure:
+  - group:
+      foo: bar

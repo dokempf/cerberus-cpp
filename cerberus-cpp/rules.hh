@@ -286,6 +286,23 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void nullable_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "nullable:       \n"
+          "  type: boolean \n"
+          "  default: false\n"
+        ),
+        [](auto& v)
+        {
+          if ((!v.getSchema().template as<bool>()) && (v.getDocument().IsNull()))
+            v.raiseError("Nullable-Rule violated!");
+        }
+      );
+    }
+
+    template<typename Validator>
     void regex_rule(Validator& validator)
     {
       validator.registerRule(
@@ -361,8 +378,7 @@ namespace Cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "schema:       \n"
-          "  type: dict    "
+          "schema: {}"
         ),
         [](auto& v)
         {
@@ -478,6 +494,7 @@ namespace Cerberus {
     impl::min_rule(v);
     impl::maxlength_rule(v);
     impl::minlength_rule(v);
+    impl::nullable_rule(v);
     impl::regex_rule(v);
     impl::require_all_rule(v);
     impl::required_rule(v);

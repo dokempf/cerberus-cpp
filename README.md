@@ -77,6 +77,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] min, max
   * [x] minlength, maxlength
   * [x] noneof
+  * [x] nullable
   * [x] oneof
   * [x] readonly
   * [x] regex

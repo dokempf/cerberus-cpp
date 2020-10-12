@@ -1,0 +1,7 @@
+schema:
+  field:
+    nullable: true
+    type: string
+success:
+  - field: ~
+  - field: foo

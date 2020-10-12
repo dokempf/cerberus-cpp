@@ -35,9 +35,20 @@ int main(int argc, char** argv)
       std::cerr << input["schema"] << std::endl;
       std::cerr << "Expected result: " << (testcase.second ? "true" : "false") << std::endl;
       std::cerr << "The following reasons were given:" << std::endl;
-      validator.printErrors(std::cerr);
+      std::cerr << validator << std::endl;
       ++failure;
     }
+    else
+    {
+      if(testcase.second)
+        std::cout << "The correctly validated and normalized data:" << std::endl << validator.getDocument() << std::endl << std::endl;
+      else
+      {
+        std::cout << "Validation rightfully failed with the following reasons:" << std::endl;
+        std::cout << validator << std::endl;
+      }
+    }
+    
   }
 
   return failure;

@@ -1,0 +1,7 @@
+# This test just asserts that the default setting on the nullable
+# rule works correctly.
+schema:
+  field:
+    type: string
+failure:
+  - field: ~

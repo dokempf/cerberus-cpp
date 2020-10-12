@@ -165,17 +165,23 @@ namespace Cerberus {
      */
     bool validate(const YAML::Node& document, const YAML::Node& schema)
     {
+      YAML::Node validated_schema;
       if(validate_schema)
       {
         Validator schema_validator(schema_schema);
         schema_validator.setSchemaValidation(false);
         for(auto entries: schema)
+        {
           if(!schema_validator.validate(entries.second))
             throw SchemaError(schema_validator);
+          validated_schema[entries.first] = schema_validator.getDocument();
+        }
       }
+      else
+        validated_schema = schema;
 
       state.reset(document);
-      state.validateDict(schema);
+      state.validateDict(validated_schema);
       return state.success();
     }
 
@@ -482,6 +488,7 @@ namespace Cerberus {
   Stream& operator<<(Stream& stream, const Validator& v)
   {
     v.printErrors(stream);
+    return stream;
   }
 
 } // namespace Cerberus
