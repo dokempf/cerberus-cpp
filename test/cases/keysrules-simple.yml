@@ -9,3 +9,6 @@ success:
   - users:
       me:
         some: data
+failure:
+  - users:
+      admin: {}

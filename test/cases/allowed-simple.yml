@@ -6,3 +6,6 @@ schema:
       - nonlinear
 success:
   - model: linear
+  - model: nonlinear
+failure:
+  - model: weird

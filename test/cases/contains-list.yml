@@ -9,4 +9,13 @@ success:
     - user
     - root
     - admin
-  
+failure:
+  - users:
+    - user
+    - other
+  - users:
+    - user
+    - root
+  - users:
+    - admin
+    - user

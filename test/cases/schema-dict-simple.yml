@@ -8,3 +8,6 @@ schema:
 success:
   - user:
       uuid: 1042
+failure:
+  - user: {}
+

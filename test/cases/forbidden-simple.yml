@@ -6,3 +6,6 @@ schema:
       - root
 success:
   - user: foo
+failure:
+  - user: admin
+  - user: root

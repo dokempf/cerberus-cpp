@@ -7,3 +7,7 @@ success:
     - user
     - root
     - admin
+failure:
+  - users:
+    - user
+    - root

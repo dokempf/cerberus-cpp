@@ -8,4 +8,7 @@ schema:
 success:
   - roles:
       me: user
-  
+failure:
+  - roles:
+      me: user
+      somebody: admin

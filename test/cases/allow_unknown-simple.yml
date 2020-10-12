@@ -9,3 +9,5 @@ success:
   - field:
       sub: abc
       other: def
+failure:
+  - other: foo

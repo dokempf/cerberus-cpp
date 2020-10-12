@@ -13,3 +13,8 @@ success:
   - foo:
       sub1: bla
       sub2: laber
+failure:
+  - foo:
+      sub1: bla
+  - foo:
+      sub2: laber

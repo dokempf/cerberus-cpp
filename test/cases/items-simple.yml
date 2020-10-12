@@ -8,3 +8,7 @@ success:
   - field:
     - 42
     - foobar
+failure:
+  - field:
+    - foo
+    - bar

@@ -7,3 +7,7 @@ success:
   - field:
     - 2
     - 4
+failure:
+  - field:
+    - foo
+    - bar

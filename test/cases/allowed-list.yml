@@ -9,3 +9,15 @@ schema:
 success:
   - models:
     - linear
+  - models:
+    - linear
+    - nonlinear
+failure:
+  - models:
+    - weird
+  - models:
+    - linear
+    - weird
+  - models:
+    - nonlinear
+    - weird

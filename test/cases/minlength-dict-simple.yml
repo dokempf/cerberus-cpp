@@ -6,3 +6,6 @@ success:
   - field:
       foo: 42
       bar: 42
+failure:
+  - field:
+      foo: 42
