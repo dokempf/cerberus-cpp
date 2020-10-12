@@ -189,6 +189,37 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void excludes_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "excludes: {}"
+        ),
+        [](auto& v)
+        {
+          // If the field is not defined, the exclusion is also not necessary!
+          if(!v.getDocument().IsDefined())
+            return;
+
+          YAML::Node exclist;
+          if(v.getSchema().IsScalar())
+            exclist[0] = v.getSchema();
+          else if(v.getSchema().IsSequence())
+            exclist = v.getSchema();
+          else
+          {
+            v.raiseError("excludes rule called with unknown data");
+            return;
+          }
+
+          for(auto exc: exclist)
+            if(v.getDocumentPath(exc.as<std::string>(), 1).IsDefined())
+              v.raiseError("excludes-Rule violated: " + exc.template as<std::string>() + " is not allowed!");
+        }
+      );
+    }
+
+    template<typename Validator>
     void forbidden_rule(Validator& validator)
     {
       validator.registerRule(
@@ -582,6 +613,7 @@ namespace Cerberus {
     impl::default_rule(v);
     impl::dependencies_rule(v);
     impl::empty_rule(v);
+    impl::excludes_rule(v);
     impl::forbidden_rule(v);
     impl::items_rule(v);
     impl::keysrules_rule(v);

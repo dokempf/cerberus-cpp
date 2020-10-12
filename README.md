@@ -72,7 +72,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] contains
   * [x] dependencies
   * [x] empty
-  * [ ] excludes
+  * [x] excludes
   * [x] forbidden
   * [x] items
   * [x] keysrules

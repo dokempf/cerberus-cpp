@@ -1,0 +1,13 @@
+schema:
+  field:
+    required: false
+    excludes: other
+  other:
+    required: false
+success:
+  - {}
+  - field: foo
+  - other: bar
+failure:
+  - field: foo
+    other: bar

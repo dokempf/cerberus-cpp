@@ -1,0 +1,23 @@
+schema:
+  field:
+    required: false
+    excludes:
+      - other
+      - third
+  other:
+    required: false
+  third:
+    required: false
+success:
+  - {}
+  - field: foo
+  - other: bar
+    third: 3
+failure:
+  - field: foo
+    other: bar
+  - field: foo
+    third: bar
+  - field: foo
+    other: bar
+    third: bar
