@@ -9,7 +9,7 @@ schema:
         type: string
   bar:
     type: string
-data:
-  foo:
-    sub1: bla
-    sub2: laber
+success:
+  - foo:
+      sub1: bla
+      sub2: laber

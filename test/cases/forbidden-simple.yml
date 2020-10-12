@@ -4,5 +4,5 @@ schema:
     forbidden:
       - admin
       - root
-data:
-  user: foo
+success:
+  - user: foo

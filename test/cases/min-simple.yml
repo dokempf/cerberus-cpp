@@ -2,6 +2,6 @@ schema:
   uuid:
     type: integer
     min: 1000
-data:
-  uuid: 1042
+success:
+  - uuid: 1042
   

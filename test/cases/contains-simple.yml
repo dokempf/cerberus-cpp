@@ -2,8 +2,8 @@ schema:
   users:
     type: list
     contains: admin
-data:
-  users:
+success:
+  - users:
     - user
     - root
     - admin

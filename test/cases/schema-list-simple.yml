@@ -3,7 +3,7 @@ schema:
     type: list
     schema:
       type: integer
-data:
-  field:
+success:
+  - field:
     - 2
     - 4

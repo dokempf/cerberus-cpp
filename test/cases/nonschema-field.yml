@@ -4,5 +4,5 @@ schema:
     type: string
   bar:
     type: string
-data:
-  foo: bar
+success:
+  - foo: bar

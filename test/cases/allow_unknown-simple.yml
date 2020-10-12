@@ -5,7 +5,7 @@ schema:
       sub:
         type: string
     allow_unknown: true
-data:
-  field:
-    sub: abc
-    other: def
+success:
+  - field:
+      sub: abc
+      other: def

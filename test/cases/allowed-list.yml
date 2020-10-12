@@ -6,6 +6,6 @@ schema:
       allowed:
         - linear
         - nonlinear
-data:
-  models:
+success:
+  - models:
     - linear

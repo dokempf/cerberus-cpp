@@ -4,8 +4,8 @@ schema:
     contains:
       - admin
       - root
-data:
-  users:
+success:
+  - users:
     - user
     - root
     - admin

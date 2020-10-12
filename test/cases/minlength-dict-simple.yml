@@ -2,7 +2,7 @@ schema:
   field:
     type: dict
     minlength: 2
-data:
-  field:
-    foo: 42
-    bar: 42
+success:
+  - field:
+      foo: 42
+      bar: 42

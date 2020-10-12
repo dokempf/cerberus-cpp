@@ -5,6 +5,6 @@ schema:
       uuid:
         type: integer
         required: true
-data:
-  user:
-    uuid: 1042
+success:
+  - user:
+      uuid: 1042

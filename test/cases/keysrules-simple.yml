@@ -5,7 +5,7 @@ schema:
       type: string
       forbidden:
         - admin
-data:
-  users:
-    me:
-      some: data
+success:
+  - users:
+      me:
+        some: data

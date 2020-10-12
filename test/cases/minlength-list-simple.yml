@@ -4,7 +4,7 @@ schema:
     minlength: 2
     schema:
       type: integer
-data:
-  field:
+success:
+  - field:
     - 2
     - 4

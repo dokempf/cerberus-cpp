@@ -4,7 +4,7 @@ schema:
     items:
       - type: integer
       - type: string
-data:
-  field:
+success:
+  - field:
     - 42
     - foobar

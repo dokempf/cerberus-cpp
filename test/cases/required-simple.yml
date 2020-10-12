@@ -2,5 +2,5 @@ schema:
   uuid:
     type: integer
     required: true
-data:
-  uuid: 1042
+success:
+  - uuid: 1042
