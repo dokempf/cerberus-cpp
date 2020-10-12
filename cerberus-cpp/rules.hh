@@ -128,6 +128,50 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void dependencies_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "dependencies: {}"
+        ),
+        [](auto& v)
+        {
+          // If the field is not defined, the dependency is also not necessary!
+          if(!v.getDocument().IsDefined())
+            return;
+
+          if(v.getSchema().IsMap())
+          {
+            for(auto dep: v.getSchema())
+            {
+              auto lookup = v.getDocumentPath(dep.first.template as<std::string>(), 1);
+              if(!lookup.IsDefined())
+                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " required!");
+              if(!v.getType("string")->equality(lookup, dep.second))
+                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value " + dep.second.template as<std::string>());
+            }
+            return;
+          }
+          
+          YAML::Node deplist;
+          if(v.getSchema().IsScalar())
+            deplist[0] = v.getSchema();
+          else if(v.getSchema().IsSequence())
+            deplist = v.getSchema();
+          else
+          {
+            v.raiseError("dependencies rule with unknown data");
+            return;
+          }
+
+          for(auto dep: deplist)
+            if(!v.getDocumentPath(dep.as<std::string>(), 1).IsDefined())
+              v.raiseError("dependencies-Rule violated: " + dep.template as<std::string>() + " required!");
+        }
+      );
+    }
+
+    template<typename Validator>
     void empty_rule(Validator& validator)
     {
       validator.registerRule(
@@ -536,6 +580,7 @@ namespace Cerberus {
     impl::allowed_rule(v);
     impl::contains_rule(v);
     impl::default_rule(v);
+    impl::dependencies_rule(v);
     impl::empty_rule(v);
     impl::forbidden_rule(v);
     impl::items_rule(v);

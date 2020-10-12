@@ -4,6 +4,7 @@
 #include<yaml-cpp/yaml.h>
 
 #include<memory>
+#include<regex>
 #include<string>
 #include<vector>
 
@@ -30,7 +31,7 @@ namespace Cerberus {
     {
       return prefix + ((prefix != "^") ? "." : "") + key;
     }
-     
+
     private:
     std::string key;
   };
@@ -58,7 +59,7 @@ namespace Cerberus {
   {
     public:
     /** @brief reset the document stack to a new document
-     * 
+     *
      * @param node The new YAML document. The stack will hold a deep copy
      *             of this document.
      */
@@ -70,7 +71,7 @@ namespace Cerberus {
     }
 
     /** @brief Push a subdocument onto the stack according to a mapping key
-     * 
+     *
      * This will add an item onto the stack by looking up a key in the current
      * top item dictionary.
      */
@@ -81,7 +82,7 @@ namespace Cerberus {
     }
 
     /** @brief Push a subdocument onto the stack according to a list index lookup
-     * 
+     *
      * This will add an item onto the stack by looking up an item in the current
      * top item list.
      */
@@ -99,10 +100,10 @@ namespace Cerberus {
     }
 
     /** @brief Accesses an item of the stack
-     * 
+     *
      * The data structure isn't technically a stack because you can access
      * more item's than just the top one by adjusting the @c level parameter.
-     * 
+     *
      * @param level The stack item index that we are interested in.
      */
     YAML::Node& get(std::size_t level = 0)
@@ -111,10 +112,10 @@ namespace Cerberus {
     }
 
     /** @brief Accesses an item of the stack
-     * 
+     *
      * The data structure isn't technically a stack because you can access
      * more item's than just the top one by adjusting the @c level parameter.
-     * 
+     *
      * @param level The stack item index that we are interested in.
      */
     const YAML::Node& get(std::size_t level = 0) const
@@ -123,7 +124,7 @@ namespace Cerberus {
     }
 
     /** @brief Extract a string describing the path from the root document through the stack
-     * 
+     *
      * This can be e.g. used to print information about the subdocument we
      * are dealing with.
      */
@@ -142,7 +143,34 @@ namespace Cerberus {
       this->push_back(node);
     }
 
+    YAML::Node pathLookup(const std::string& key, std::size_t level = 0)
+    {
+      return pathLookup(key, get(level));
+    }
+
     private:
+    YAML::Node pathLookup(const std::string& key, YAML::Node node)
+    {
+      std::smatch match;
+      // Find out that we need to restart this from the document root
+      if(std::regex_match(key, match, std::regex{"^\\^(.*)$"}))
+        return pathLookup(match[1].str(), (*this)[0]);
+
+      // Recurse into dictionaries
+      if(std::regex_match(key, match, std::regex{"^([^\\.\\[]+)\\.(.*)$"}))
+        return pathLookup(match[2].str(), node[match[1].str()]);
+
+      // Recurse into lists
+      if(std::regex_match(key, match, std::regex{"^\\[([0-9]+])\\](.*)$"}))
+        return pathLookup(match[2].str(), node[std::stoi(match[1].str())]);
+
+      // Stop recursion if the key prefix is empty
+      if(key == "")
+        return node;
+
+      return node[key];
+    }
+
     std::vector<std::shared_ptr<DocumentPathItem>> path;
   };
 

@@ -209,7 +209,7 @@ namespace Cerberus {
     }
 
     /** @brief Print errors to a stream
-     * 
+     *
      * This also accessible through the overloaded stream operator<<.
      */
     template<typename Stream>
@@ -434,6 +434,19 @@ namespace Cerberus {
         return document_stack.get(level);
       }
 
+      /** @brief Lookup a part of the document according to a key string
+       *
+       * This method can be used to access subdocuments for rules that cross-reference
+       * data, such as e.g. the @c dependencies rule.
+       *
+       * @param key The key to look up
+       * @param level The subdocument level just as used in the @c getDocument method.
+       */
+      YAML::Node getDocumentPath(const std::string& key, std::size_t level = 0)
+      {
+        return document_stack.pathLookup(key, level);
+      }
+
       //! Get the validators current policy about accepting unknown values
       bool getAllowUnknown() const
       {
@@ -450,8 +463,8 @@ namespace Cerberus {
       void setAllowUnknown(bool value)
       {
         allow_unknown = value;
-      }      
-      
+      }
+
       //! Get the validators current policy about purging unknown values
       bool getPurgeUnknown() const
       {

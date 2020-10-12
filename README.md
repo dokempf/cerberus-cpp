@@ -70,7 +70,7 @@ This is the roadmap towards cerberus feature completeness:
   * [x] anyof
   * [x] check_with
   * [x] contains
-  * [ ] dependencies
+  * [x] dependencies
   * [x] empty
   * [ ] excludes
   * [x] forbidden

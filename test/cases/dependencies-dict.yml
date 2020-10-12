@@ -1,0 +1,15 @@
+schema:
+  field1:
+    required: false
+  field2:
+    required: false
+    dependencies:
+      field1: foo
+success:
+  - {}
+  - field1: bar
+  - field1: foo
+    field2: bar
+failure:
+  - field1: bar
+    field2: foo
