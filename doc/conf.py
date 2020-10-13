@@ -66,7 +66,7 @@ read_the_docs_build = os.environ.get('READTHEDOCS', None) == 'True'
 # Implement build logic on RTD servers
 if read_the_docs_build:
     cwd = os.getcwd()
-    os.makedirs("build")
-    builddir = os.path.join(cwd, "build")
+    os.makedirs("build-cmake")
+    builddir = os.path.join(cwd, "build-cmake")
     subprocess.call("cmake ..".split(), cwd=builddir)
     subprocess.call("cmake --build doxygen".split(), cwd=builddir)
