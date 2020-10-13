@@ -70,5 +70,5 @@ if read_the_docs_build:
     os.makedirs("build-cmake", exist_ok=True)
     builddir = os.path.join(cwd, "build-cmake")
     subprocess.call("cmake -DDOCS_ONLY=1 ../..".split(), cwd=builddir)
-    subprocess.call("cmake --build doxygen".split(), cwd=builddir)
+    subprocess.call("cmake --build . --target doxygen".split(), cwd=builddir)
     breathe_projects["cerberus-cpp"] = os.path.join(builddir, "doc", "xml")
