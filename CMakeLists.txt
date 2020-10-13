@@ -4,7 +4,15 @@ cmake_minimum_required(VERSION 3.11)
 
 include(CTest)
 
-find_package(yaml-cpp REQUIRED)
+# When building documentation from readthedocs.io, we need to
+# run CMake, but we do not need to build C++ code, so we should
+# skip any required dependencies.
+set(REQUIRED_STRING REQUIRED)
+if(DOCS_ONLY)
+  set(REQUIRED_STRING "")
+endif()
+
+find_package(yaml-cpp ${REQUIRED_STRING})
 find_package(PythonLibs)
 
 add_subdirectory(cerberus-cpp)
