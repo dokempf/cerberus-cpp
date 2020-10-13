@@ -142,6 +142,7 @@ namespace Cerberus {
      * class constructor.
      *
      * @param document The document to validate
+     * @returns Whether or not the validation process was successful
      */
     bool validate(const YAML::Node& document)
     {
@@ -154,6 +155,7 @@ namespace Cerberus {
      *
      * @param document The document to validate
      * @param schema The schema to validate against
+     * @returns Whether or not the validation process was successful
      */
     bool validate(const YAML::Node& document, const YAML::Node& schema)
     {
@@ -180,6 +182,8 @@ namespace Cerberus {
     /** @brief Retrieves the normalized document after validation
      *
      * This is only valid after @ref validate has been called.
+     *
+     * @returns the validated and normalized document
      */
     const YAML::Node& getDocument()
     {
@@ -188,7 +192,7 @@ namespace Cerberus {
 
     /** @brief Print errors to a stream
      *
-     * This also accessible through the overloaded stream operator<<.
+     * This also accessible through the overloaded stream @c operator<<.
      */
     template<typename Stream>
     void printErrors(Stream& stream) const
@@ -208,7 +212,11 @@ namespace Cerberus {
     class ValidationRuleInterface
     {
       public:
-      //! Construct the rule interface given the Validator instance
+      /** @brief Construct the rule interface
+       *
+       * @param validator the Validator instance
+       * @param document The document to validate
+       */
       ValidationRuleInterface(Validator& validator, const YAML::Node& document)
         : validator(validator)
         , allow_unknown(false)
@@ -480,27 +488,42 @@ namespace Cerberus {
         require_all = value;
       }
 
+      //! Whether or not the validation process was successful
       bool success() const
       {
         return errors.empty();
       }
 
+      //! Reset the internal state to a new root document
       void reset(const YAML::Node& document)
       {
         errors.clear();
         document_stack.reset(YAML::Clone(document));
       }
 
+      /** @brief Record information that we are currently validating a given dictionary field
+       *
+       * This is used by the @ref validateItem rule to keep track of what field
+       * is currently validated. Normalization rules, e.g. @c rename may call
+       * this to alter the internal state of the validator.
+       */
       void pushCurrentField(const std::string& field_)
       {
         field.push_back(field_);
-      }
 
+      }
+      /** @brief Record information that we are done validating a given dictionary field
+       *
+       * This is used by the @ref validateItem rule to keep track of what field
+       * is currently validated. Normalization rules, e.g. @c rename may call
+       * this to alter the internal state of the validator.
+       */
       void popCurrentField()
       {
         field.pop_back();
       }
 
+      //! Get the currently validated dictionary field
       const std::string& getCurrentField()
       {
         return field.back();
