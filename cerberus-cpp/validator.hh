@@ -135,12 +135,6 @@ namespace Cerberus {
       state.setRequireAll(value);
     }
 
-    /** @brief Whether schemas given to this Validator should themselves be validated */
-    void setSchemaValidation(bool value)
-    {
-      validate_schema = value;
-    }
-
     /** @brief Validate a given document
      *
      * This is one of the end user entrypoints to perform validation.
@@ -167,7 +161,7 @@ namespace Cerberus {
       if(validate_schema)
       {
         Validator schema_validator(schema_schema);
-        schema_validator.setSchemaValidation(false);
+        schema_validator.validate_schema = false;
         for(auto entries: schema)
         {
           if(!schema_validator.validate(entries.second))
