@@ -67,22 +67,6 @@ namespace Cerberus {
      * a @c ValidationRuleInterface instance which they can use to implement their
      * custom behaviour. Furthermore, they are expected to return @c void.
      *
-     * Here is a full example for a rule that checks that a field is a string that
-     * starts with a certain substr:
-     *
-     * @code
-     * validator.registerRule(
-     *   YAML::Load(
-     *     "startswith:        \n"
-     *     "  type: string       "
-     *   ),
-     *   [](auto& v){
-     *     if(v.getDocument().as<std::string>().rfind(v.getSchema().as<std::string>(), 0) == 0)
-     *       v.raiseError("Startswith-Rule violated!");
-     *   }
-     * );
-     * @endcode
-     *
      * @param schema A YAML mapping that gives a schema that describes how the rule
      *               is used. This schema is used to incrementally built a schema that
      *               validates user-provided schemas.
@@ -201,7 +185,7 @@ namespace Cerberus {
 
     /** @brief Retrieves the normalized document after validation
      *
-     * This is only valid after @c validate has been called.
+     * This is only valid after @ref validate has been called.
      */
     const YAML::Node& getDocument()
     {
