@@ -69,4 +69,4 @@ if read_the_docs_build:
     os.makedirs("build")
     builddir = os.path.join(cwd, "build")
     subprocess.call("cmake ..".split(), cwd=builddir)
-    subprocess.call("cmake --build doxygen", cwd=builddir)
+    subprocess.call("cmake --build doxygen".split(), cwd=builddir)
