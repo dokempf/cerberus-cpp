@@ -1,13 +1,65 @@
 # What is cerberus-cpp
 
-cerberus-cpp is a schema validation for YAML data written in C++.
-It reimplements schema validation of the Python tool [cerberus](https://github.com/pyeve/cerberus)
+cerberus-cpp is a schema validation tool for YAML data written in C++.
+It reimplements a subset of the schema validation of the Python tool [cerberus](https://github.com/pyeve/cerberus)
 in the C++ language. This allows the same schemas to be used in Python
 and C++ projects, as well as projects that mix these languages.
 For YAML parsing, cerberus-cpp relies on the well-established [yaml-cpp](https://github.com/jbeder/yaml-cpp)
 library.
 
-# Incompatibilities between cerberus and cerberus-cpp
+# Core Features
+
+* Simple, yet powerful definition of validation schema
+* Validation of arbitrarily nested data
+* Modern C++11 design
+* Schema are implemented in the same language as the data - no DSLs to learn!
+* Validation of schemas against a schema that is incrementally built from rules definitions
+* Registration of custom validation and normalization rules
+* Registration of custom types
+* Compatibility with a well-established Python package
+
+# Prerequisites
+
+Cerberus-cpp is header-only, so it should be fairly easy to get up and running.
+It requires the following software to be available:
+
+* A C++11-compliant C++ compiler
+* CMake >= 3.11
+* The [yaml-cpp](https://github.com/jbeder/yaml-cpp) library, e.g. by installing
+  the Debian package `libyaml-cpp-dev`.
+
+# Basic usage example
+
+Here is a very basic usage of cerberus-cpp:
+
+```
+#include<cerberus-cpp/validator.hh>
+
+int main()
+{
+  YAML::Node schema = YAML::Load(    
+    "user:            \n"
+    "  type: string   \n"
+    "  forbidden:     \n"
+    "    - admin      \n"
+    "    - root       \n"
+  );
+  YAML::Node document = YAML::Load(
+    "user: dkempf"
+  );
+
+  Validator validator(schema);
+
+  if(validator.validate(document))
+    doSomething(validator.getDocument())
+  else
+    std::cerr << validator << std::endl;
+}
+```
+
+For more information, check the documentation.
+
+# (In)Compatibility between cerberus and cerberus-cpp
 
 Cerberus-cpp tries to be compatible with the Python package cerberus.
 In reality, some inconsistencies exist. If you have a use case where
@@ -55,61 +107,3 @@ schema and data:
   * `coerce`: Similarly to `check_with`, a a custom coercer is not really different
     from a custom normalization rule. Might add a `coerce` rule later for compatibility
     with Python cerberus later though.
-
-# Road map
-
-This is the roadmap towards cerberus feature completeness:
-
-* General validation stuff
-  * [x] Schema registration
-  * [x] Validation of schemas against Schema Schema
-* Validation Rules
-  * [x] allof
-  * [x] allow_unknown
-  * [x] allowed
-  * [x] anyof
-  * [x] check_with
-  * [x] contains
-  * [x] dependencies
-  * [x] empty
-  * [x] excludes
-  * [x] forbidden
-  * [x] items
-  * [x] keysrules
-  * [x] meta
-  * [x] min, max
-  * [x] minlength, maxlength
-  * [x] noneof
-  * [x] nullable
-  * [x] oneof
-  * [x] readonly
-  * [x] regex
-  * [x] require_all
-  * [x] required
-  * [x] schema (dict)
-  * [x] schema (list)
-  * [x] type
-    *  [x] integer
-    *  [x] float
-    *  [x] string
-    *  [x] boolean
-    *  [x] number
-    *  [x] binary
-    *  [x] date
-    *  [x] datetime
-    *  [x] dict
-    *  [x] list
-    *  [x] set
-  * [x] valuesrules
-* Normalization Rules
-  * [x] Renaming
-  * [x] Purging
-  * [x] Default Values
-  * [x] Value Coercion
-* [ ] Error Handling
-* Customization
-  * [ ] Custom error handling
-  * [ ] Custom validation rules
-  * [ ] Custom data types
-  * [ ] Custom coercers
-  * [ ] Custom default setters
