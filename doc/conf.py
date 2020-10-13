@@ -58,6 +58,7 @@ html_theme = 'alabaster'
 html_static_path = []
 
 # Breathe Configuration
+breathe_projects = {}
 breathe_default_project = "cerberus-cpp"
 
 # Check if we're running on Read the Docs' servers
@@ -70,3 +71,4 @@ if read_the_docs_build:
     builddir = os.path.join(cwd, "build-cmake")
     subprocess.call("cmake ..".split(), cwd=builddir)
     subprocess.call("cmake --build doxygen".split(), cwd=builddir)
+    breathe_projects["cerberus-cpp"] = os.path.join(builddir, "doc", "xml")
