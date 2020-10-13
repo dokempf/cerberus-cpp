@@ -273,6 +273,7 @@ namespace Cerberus {
                                     RulePriority::NORMALIZATION,
                                     RulePriority::VALIDATION,
                                     RulePriority::TYPECHECKING,
+                                    RulePriority::POST_NORMALIZATION,
                                     RulePriority::LAST })
         {
           // Implement the require all policy of the validator
@@ -313,13 +314,12 @@ namespace Cerberus {
         std::vector<std::string> found;
         for(auto fieldrules : schema)
         {
-          auto field = fieldrules.first.as<std::string>();
+          setCurrentField(fieldrules.first.as<std::string>());
           auto rules = fieldrules.second;
-          found.push_back(field);
-
           document_stack.pushDictItem(field);
           validateItem(rules);
           getDocument(1)[field] = getDocument();
+          found.push_back(field);
           document_stack.pop();
         }
 
@@ -512,6 +512,16 @@ namespace Cerberus {
         document_stack.reset(YAML::Clone(document));
       }
 
+      void setCurrentField(const std::string& field_)
+      {
+        field = field_;
+      }
+
+      const std::string& getCurrentField()
+      {
+        return field;
+      }
+
       // TODO: These should move to private. In order to do so, all rules implementations
       //       need to go through one of the above interfaces.
       DocumentStack schema_stack;
@@ -523,6 +533,7 @@ namespace Cerberus {
       bool allow_unknown;
       bool purge_unknown;
       bool require_all;
+      std::string field;
     };
 
     YAML::Node schema_;

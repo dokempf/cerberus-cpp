@@ -102,7 +102,7 @@ This is the roadmap towards cerberus feature completeness:
     *  [x] set
   * [x] valuesrules
 * Normalization Rules
-  * [ ] Renaming
+  * [x] Renaming
   * [x] Purging
   * [x] Default Values
   * [x] Value Coercion

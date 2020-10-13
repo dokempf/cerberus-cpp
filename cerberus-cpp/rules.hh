@@ -18,7 +18,8 @@ namespace Cerberus {
     NORMALIZATION = 1,
     VALIDATION = 2,
     TYPECHECKING = 3,
-    LAST = 4
+    POST_NORMALIZATION = 4,
+    LAST = 5
   };
 
   namespace impl {
@@ -443,6 +444,31 @@ namespace Cerberus {
     }
 
     template<typename Validator>
+    void rename_rule(Validator& validator)
+    {
+      validator.registerRule(
+        YAML::Load(
+          "rename:       \n"
+          "  type: string  "
+        ),
+        [](auto& v)
+        {
+          auto dict = v.getDocument(1);
+          auto doc = v.getDocument(0);
+
+          YAML::Node newdict;
+          for(auto item : dict)
+            if(item.first.template as<std::string>() != v.getCurrentField())
+              newdict[item.first] = item.second;
+          v.getDocument(1).reset(newdict);
+
+          v.setCurrentField(v.getSchema().template as<std::string>());
+        },
+        RulePriority::POST_NORMALIZATION
+      );
+    }
+
+    template<typename Validator>
     void require_all_rule(Validator& validator)
     {
       auto state = std::make_shared<std::vector<bool>>();
@@ -624,6 +650,7 @@ namespace Cerberus {
     impl::nullable_rule(v);
     impl::purge_unknown_rule(v);
     impl::regex_rule(v);
+    impl::rename_rule(v);
     impl::require_all_rule(v);
     impl::required_rule(v);
     impl::schema_rule(v);
