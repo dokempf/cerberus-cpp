@@ -298,13 +298,14 @@ namespace Cerberus {
         std::vector<std::string> found;
         for(auto fieldrules : schema)
         {
-          setCurrentField(fieldrules.first.as<std::string>());
+          pushCurrentField(fieldrules.first.as<std::string>());
           auto rules = fieldrules.second;
-          document_stack.pushDictItem(field);
+          document_stack.pushDictItem(getCurrentField());
           validateItem(rules);
-          getDocument(1)[field] = getDocument();
-          found.push_back(field);
+          getDocument(1)[getCurrentField()] = getDocument();
+          found.push_back(getCurrentField());
           document_stack.pop();
+          popCurrentField();
         }
 
         if((purge_unknown) && (found.size() != getDocument().size()))
@@ -496,14 +497,19 @@ namespace Cerberus {
         document_stack.reset(YAML::Clone(document));
       }
 
-      void setCurrentField(const std::string& field_)
+      void pushCurrentField(const std::string& field_)
       {
-        field = field_;
+        field.push_back(field_);
+      }
+
+      void popCurrentField()
+      {
+        field.pop_back();
       }
 
       const std::string& getCurrentField()
       {
-        return field;
+        return field.back();
       }
 
       // TODO: These should move to private. In order to do so, all rules implementations
@@ -517,7 +523,7 @@ namespace Cerberus {
       bool allow_unknown;
       bool purge_unknown;
       bool require_all;
-      std::string field;
+      std::vector<std::string> field;
     };
 
     YAML::Node schema_;

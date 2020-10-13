@@ -462,7 +462,8 @@ namespace Cerberus {
               newdict[item.first] = item.second;
           v.getDocument(1).reset(newdict);
 
-          v.setCurrentField(v.getSchema().template as<std::string>());
+          v.popCurrentField();
+          v.pushCurrentField(v.getSchema().template as<std::string>());
         },
         RulePriority::POST_NORMALIZATION
       );
