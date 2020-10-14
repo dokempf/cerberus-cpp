@@ -15,10 +15,68 @@ Getting Started
 Installation
 ------------
 
+Cerberus-cpp is header-only, so it should be fairly easy to get up and running.
+It requires the following software to be available:
+
+* A C++11-compliant C++ compiler
+* CMake >= 3.11
+* The `yaml-cpp <https://github.com/jbeder/yaml-cpp>` library
+* git
+
+The easiest way to get yaml-cpp is:
+
+* On Debian, Ubuntu: :code:`sudo apt install libyaml-cpp-dev`
+* On MacOS: :code:`brew install yaml-cpp`
+
+With these prerequisites met, cerberus-cpp is installed just as any other
+CMake project is, e.g.
+
+.. code-block:: bash
+
+   git clone https://github.com/dokempf/cerberus-cpp.git
+   cd cerberus-cpp
+   mkdir build
+   cd build
+   cmake ..
+   make
+   make install
+
 .. _example:
 
 Usage example
 -------------
+
+This is the most basic usage example that validates a given document against
+a schema.
+
+.. code-block:: c++
+
+   YAML::Node schema = YAML::Load(
+     "answer:          \n"
+     "  type: integer  \n"
+     "  default: 42    \n"
+     "question:        \n"
+     "  type: string   \n"
+   );
+
+   YAML::Node document;
+   document["answer"] = "What is 6x9?";
+
+   Validator validator(schema);
+   if (validator.validate(document))
+   {
+     YAML::Node doc = validator.getDocument();
+     std::cout << doc.as<std::string>() << " " << doc["answer"].as<int>() << std::endl;
+   }
+   else
+     std::cerr << validator << std::endl;
+
+As you can see, both the schema and the document are defined using the :code:`YAML::Node`
+data structure. In order to work with cerberus-cpp, it is important to be familiar with
+the basic usage of yaml-cpp as e.g. described in `the yaml-cpp documentation <https://github.com/jbeder/yaml-cpp/wiki/Tutorial>`_.
+In the above examples, we are loading the schema from inline YAML with :code:`YAML::Load`,
+while we programmatically construct the document. Often, your document will of course come
+from user input e.g. by loading it from disk with :code:`YAML::LoadFile`.
 
 .. _basic:
 
