@@ -31,11 +31,7 @@ namespace YAML {
 
     static bool decode(const Node& node, SimpleDate& rhs)
     {
-      if(!node.IsScalar())
-        return false;
-
-      rhs.year = node.as<int>();;
-      return true;
+      return convert<int>::decode(node, rhs.year);
     }
   };
 }

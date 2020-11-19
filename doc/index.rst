@@ -80,7 +80,9 @@ Advanced Usage
 ==============
 
 This section is only relevant to users who seek to enhance the capabilities of
-cerberus-cpp by e.g. providing custom rules and types.
+cerberus-cpp by e.g. providing custom rules and types. All customizations described
+in this documentation operate on instances of :code:`Cerberus::Validator`. You may
+also apply these in the constructor of a derived class.
 
 .. _custom_rule:
 
@@ -105,7 +107,7 @@ additionally enforce the argument to be of the :code:`integer` type by adding a
 :code:`dependencies` rule.
 
 The second argument is expected to be a templated callable (here: a generic lambda)
-that implements the rule. The only argument is typically an instance of the :ref:`rule_api`,
+that implements the rule. The only argument is typically a reference to an instance of the :ref:`rule_api`,
 although the type is accepted as a template parameter to integrate well with custom
 derived validator classes. In our example, only the most relevant methods of the
 :ref:`rule_api` are used:
