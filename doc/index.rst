@@ -49,27 +49,8 @@ Usage example
 This is the most basic usage example that validates a given document against
 a schema.
 
-.. code-block:: c++
-
-   YAML::Node schema = YAML::Load(
-     "answer:          \n"
-     "  type: integer  \n"
-     "  default: 42    \n"
-     "question:        \n"
-     "  type: string   \n"
-   );
-
-   YAML::Node document;
-   document["question"] = "What is 6x9?";
-
-   Validator validator(schema);
-   if (validator.validate(document))
-   {
-     YAML::Node doc = validator.getDocument();
-     std::cout << doc["question"].as<std::string>() << " " << doc["answer"].as<int>() << std::endl;
-   }
-   else
-     std::cerr << validator << std::endl;
+.. literalinclude:: examples/first.cc
+   :language: c++
 
 As you can see, both the schema and the document are defined using the :code:`YAML::Node`
 data structure. In order to work with cerberus-cpp, it is important to be familiar with
@@ -98,15 +79,75 @@ Normalization:
 Advanced Usage
 ==============
 
+This section is only relevant to users who seek to enhance the capabilities of
+cerberus-cpp by e.g. providing custom rules and types.
+
 .. _custom_rule:
 
 Custom Validation Rules
 -----------------------
 
+Custom validation rules can be registered on instances of :code:`Cerberus::Validator`.
+This is an example that registers a custom rule :code:`oddity` that only accepts odd
+integer values:
+
+.. literalinclude:: examples/oddrule.cc
+   :language: c++
+   :start-after: START
+   :end-before: END
+
+The first argument here defines a schema that is used to validate the rule in the
+user-provided schemas (a meta-schema so to say). This on one hand defines the name
+of the rule (here: :code:`oddity`) and on the other hand rules out misuse (like e.g.
+providing :code:`oddity: 42`, where only :code:`bool` arguments are allowed). You can
+use all available schema rules, though typically only the name is required. Here, we
+additionally enforce the argument to be of the :code:`integer` type by adding a
+:code:`dependencies` rule.
+
+The second argument is expected to be a templated callable (here: a generic lambda)
+that implements the rule. The only argument is typically an instance of the :ref:`rule_api`,
+although the type is accepted as a template parameter to integrate well with custom
+derived validator classes. In our example, only the most relevant methods of the
+:ref:`rule_api` are used:
+
+* :code:`getDocument()` gives the :code:`YAML::Node` that describes the document snippet that is currently validated.
+* :code:`getSchema()` provides the :code:`YAML::Node` that describes the schema snippet for this validation.
+* :code:`raiseError()` reports a validation error
+
 .. _custom_type:
 
 Custom Types
 ------------
+
+By default, cerberus-cpp supports integers, floating point types, strings, boolean values,
+as well a sequences and mappings. You can however provide custom types as well. We illustrate
+this by implementing a simple date type that only stores a year. While this of course could be
+achieved with an integer as well, we use this to illustrate how a custom class is validated.
+
+.. literalinclude:: examples/datetype.cc
+   :language: c++
+   :start-after: START_DATE
+   :end-before: END_DATE
+
+This simple implementation at the same time documents the minimum requirement on the interface of eligible C++ types:
+:code:`operator==` and :code:`operator<` need to be defined.
+On top of that :code:`yaml-cpp` s (de)serialization needs to be implemented for this type according to their
+`Guide <https://github.com/jbeder/yaml-cpp/wiki/Tutorial#converting-tofrom-native-data-types>`_ :
+
+.. literalinclude:: examples/datetype.cc
+   :language: c++
+   :start-after: START_YML
+   :end-before: END_YML
+
+Registration of the new type with a given validator is then as simple as this:
+
+.. literalinclude:: examples/datetype.cc
+   :language: c++
+   :start-after: START_REG
+   :end-before: END_REG
+
+Now, this type can be referenced with a rule :code:`type: date` and validation will fail if the
+YAML deserialization of the input fails.
 
 .. _schema_registration:
 

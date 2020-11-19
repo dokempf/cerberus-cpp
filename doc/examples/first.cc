@@ -24,6 +24,5 @@ int main()
   }
   else
     std::cerr << validator << std::endl;
-  
   return 0;
 }
