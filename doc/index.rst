@@ -20,7 +20,7 @@ It requires the following software to be available:
 
 * A C++11-compliant C++ compiler
 * CMake >= 3.11
-* The `yaml-cpp <https://github.com/jbeder/yaml-cpp>` library
+* The `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ library
 * git
 
 The easiest way to get yaml-cpp is:
@@ -60,13 +60,13 @@ a schema.
    );
 
    YAML::Node document;
-   document["answer"] = "What is 6x9?";
+   document["question"] = "What is 6x9?";
 
    Validator validator(schema);
    if (validator.validate(document))
    {
      YAML::Node doc = validator.getDocument();
-     std::cout << doc.as<std::string>() << " " << doc["answer"].as<int>() << std::endl;
+     std::cout << doc["question"].as<std::string>() << " " << doc["answer"].as<int>() << std::endl;
    }
    else
      std::cerr << validator << std::endl;

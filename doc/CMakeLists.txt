@@ -1,3 +1,5 @@
+add_subdirectory(examples)
+
 find_package(Doxygen)
 
 if(DOXYGEN_FOUND)
