@@ -30,6 +30,8 @@ It requires the following software to be available:
 
 # Documentation
 
+[![Documentation Status](https://readthedocs.org/projects/cerberus-cpp/badge/?version=latest)](https://cerberus-cpp.readthedocs.io/en/latest/?badge=latest)
+
 For usage examples, detailed instructions and an overview on the compatibility
 with the Python package, check out the
 [cerberus-cpp documentation](https://cerberus-cpp.readthedocs.io)
