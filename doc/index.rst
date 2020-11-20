@@ -156,6 +156,15 @@ YAML deserialization of the input fails.
 Schema Registration
 -------------------
 
+If you intend to reuse schemas a lot, you can also have a validator instance store them by
+using the :code:`registerSchema` method. Later on, the schema can either be retrieved by
+using the special signature of :code:`validate` that specifies the schema with a string or
+by specifying the string as the value for a :code:`schema` validation rule.
+
+.. literalinclude:: examples/registerschema.cc
+   :language: c++
+   :start-after: START
+   :end-before: END
 
 .. _compatibility:
 

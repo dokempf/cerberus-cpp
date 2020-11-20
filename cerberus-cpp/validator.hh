@@ -179,6 +179,19 @@ namespace Cerberus {
       return state.success();
     }
 
+    /** @brief Validate a given document against a registered schema
+     *
+     * This is one of the end user entrypoints to perform validation
+     *
+     * @param document The document to validate
+     * @param schema The schema to validate against
+     * @returns Whether or not the validation process was successful
+     */
+    bool validate(const YAML::Node& document, const std::string& schema)
+    {
+      return validate(document, schema_registry[schema]);
+    }
+
     /** @brief Retrieves the normalized document after validation
      *
      * This is only valid after @ref validate has been called.
