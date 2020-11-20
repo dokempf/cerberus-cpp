@@ -23,7 +23,7 @@ library.
 Cerberus-cpp is header-only, so it should be fairly easy to get up and running.
 It requires the following software to be available:
 
-* A C++11-compliant C++ compiler
+* A C++14-compliant C++ compiler
 * CMake >= 3.11
 * The [yaml-cpp](https://github.com/jbeder/yaml-cpp) library, e.g. by installing
   the Debian package `libyaml-cpp-dev`.

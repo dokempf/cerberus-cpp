@@ -14,7 +14,7 @@ addons:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_STANDARD=11 ..
+  - cmake -DCMAKE_CXX_STANDARD=14 ..
   # Wraps the compilation with the Build Wrapper to generate configuration (used
   # later by the SonarScanner) into the "bw-output" folder
   - build-wrapper-linux-x86-64 --out-dir bw-output make examples
