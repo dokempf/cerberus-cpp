@@ -116,6 +116,14 @@ derived validator classes. In our example, only the most relevant methods of the
 * :code:`getSchema()` provides the :code:`YAML::Node` that describes the schema snippet for this validation.
 * :code:`raiseError()` reports a validation error
 
+Some rules require to be applied before or after certain other rules in order to
+implement the correct semantics. Cerberus-cpp gives control over this by providing
+a number of hooks, when rules execute. The hook at which a custom rule executes can
+be controlled by passing a third argument. The enumeration :code:`Cerberus::RulePriority`
+lists the possible values:
+
+.. doxygenenum:: Cerberus::RulePriority
+
 .. _custom_type:
 
 Custom Types

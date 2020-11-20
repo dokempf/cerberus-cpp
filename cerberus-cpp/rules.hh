@@ -12,13 +12,20 @@
 
 namespace Cerberus {
 
+  /** @brief Definition of rule priorities (or hooks) that exist in the validation process */
   enum class RulePriority
   {
+    //! This executes before anything else. Use for modifications of validator state.
     FIRST = 0,
+    //! Use this for normalization, it executes before validation.
     NORMALIZATION = 1,
+    //! The default. Use for standard validation rule.
     VALIDATION = 2,
+    //! Type checking rules execute after all other validation rules.
     TYPECHECKING = 3,
+    //! Use this for normalization rules that need to operate after validation.
     POST_NORMALIZATION = 4,
+    //! This executes after anything else. Use for modifications of validator state.
     LAST = 5
   };
 
