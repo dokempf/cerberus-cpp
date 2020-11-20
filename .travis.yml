@@ -1,0 +1,22 @@
+addons:
+  sonarcloud:
+    organization: "dokempf"
+    token:
+      secure: "KWyTxYNJxmKMFmeOwuDalz+NLuPFTX4VH5jVDUEV3/++bnzdWZBIQvFKErJVsVAr3AeVqOcIQQWiO1Zt+QUNz/UcjoS85+TxgyTEZlGxyPv5Jn2sjA4f5nCZ6Fsj1ma3bQig7b+2jXg+9WUOSvH5qpy0zNvopaOvV36wIY3iDv6pedH3GrCXNY81O6i2TkDMGp0b1ed2oYkm/GcNNtBELF70jxkd8a4h0ftVm6KCzkV9U0Qfi9xn8KmY/9jCMvBGo5k7UhJPgsJ2p7+C3XD7N+CSylJf4v7TwNPXT4H9skNBE6pBxjj0AdAX3tosJVquieSCdfrDN8l0e8YZ6ESDD+w8cjp7cd9HjWv0VsDkXjgGLec2Z2oAtHeXH4ppOnb/dwfatjh6FL4W1QUpXAWEHxmAnJNsGRm+SVS459AmHW/Hk54HgSJnaqNgKHRPCvyCMSLpBZ4tyR13Q0n8WC0zOO26oiDF5AeGLsSVA4hKHVt8tvXMkPdhsdf1gByG4b1057trEAhXdSkzO7BkAkYNOX44w17R48388Fn9Grk1+QkKtBgX/tgBC5Y3a5+e3X+UzRFr00hnIX032OpPZcCMFhuJ1I5WvBBx75sOhU3PPejw8Y0omwUT4sB/DGvR2lfq2m+G0CsvVon2hDmGRe1288x7geYhQ8DZXVxzb3E6n0U="
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libyaml-cpp-dev
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cd ..
+  # Wraps the compilation with the Build Wrapper to generate configuration (used
+  # later by the SonarScanner) into the "bw-output" folder
+  - build-wrapper-linux-x86-64 --out-dir bw-output cmake --build build/
+  # And finally run the SonarCloud analysis - read the "sonar-project.properties"
+  # file to see the specific configuration
+  - sonar-scanner -Dsonar.cfamily.build-wrapper-output=bw-output
+
