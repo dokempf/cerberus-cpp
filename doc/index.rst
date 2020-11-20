@@ -69,10 +69,83 @@ Basic Usage
 Validation
 ----------
 
+The most important component provided by cerberus-cpp is the :code:`Cerberus::Validator` class.
+An instance of this validator is given a schema and a document. The document is then validated
+against this schema using the :code:`validate` method - returning a boolean value indicating success.
+If the validation process fails, the errors can be written to a stream using the validator's
+:code:`printErrors` method, or more conveniently by passing the validator itself into the stream:
+
+.. code-block:: c++
+
+   Cerberus::Validator validator;
+   if(!validator.validate(document, schema))
+     std::cerr << validator << std::endl;
+
+The schema and the document are both provided as instances of :code:`YAML::Node`. Using the same
+data structure for schemas and documents is considered a feature of cerberus-cpp. A tutorial
+on how to construct these documents from YAML files, from inline strings or programmatically
+can be found in `the yaml-cpp documentation <https://github.com/jbeder/yaml-cpp/wiki/Tutorial>`_.
+Both schemas and documents are always expected to be mappings.
+
+
+The validator class has the following configurable validation policies:
+
+* whether or not unknown fields in the document (fields that do not appear in the schema) should
+  make the validation process fail (can be toggled using the :code:`setAllowUnknown(value)` method).
+  The default is :code:`false`.
+* whether or not all fields are considered to be required fields (can be toggled using the :code:`setRequireAll(value)` method).
+  The default is :code:`false`.
+
+
+In the following, we will provide a summary of the available validation rules in cerberus-cpp.
+As cerberus-cpp aims for compatibility with Python package cerberus, you can read more on the
+semantics of these rules in the `Cerberus Validation Rule Documentation <https://docs.python-cerberus.org/en/stable/validation-rules.html>`_.
+For inconsistencies between the Python package and cerberus-cpp see :ref:`compatibility`.
+This is the list of implemented validation rules in order of relevance for most applications:
+
+* :code:`type` specifies the expected type for this field. Possible values are :code:`integer`, :code:`float`, :code:`string`, :code:`boolean`, :code:`list`, :code:`dict` or any identifier of a custom type (see :ref:`custom_rule`).
+* :code:`required` forces the existence of the field in the document.
+* :code:`schema` specifies a schema for a submapping or a sublist
+* :code:`allowed` specifies the list of allowed values for the field.
+* :code:`forbidden` in contrast specifies a list of forbidden values for the field
+* :code:`min` and :code:`max` specify a minimum and maximum for the value and require :code:`type` to be set to something that allows comparison
+* :code:`regex` matches the field's value against the given regular expression
+* :code:`keysrules`, :code:`valuesrules` allow rules only for keys resp. values of submapping.
+* :code:`minlength` and :code:`maxlength` constrain the allowed length of list or mapping
+* :code:`items` specifies a list of schemas that the entries of a list need to fulfill
+* :code:`contains` forces the existence of a value within a list
+* :code:`dependencies` forces the existence of another field, if the given field is present
+* :code:`excludes` forces the absence of another field, if the given field is present
+* :code:`nullable` specifies whether the field accepts a null value
+* :code:`allow_unknown` changes the validators policy regarding unknown values e.g. for a submapping
+* :code:`require_all` changes the validators policy regarding requiring all fields e.g. for a submapping
+
+
 .. _normalization:
 
-Normalization:
+Normalization
 --------------
+
+Cerberus-cpp can not only perform validation, but also modify the document according to
+normalization rules. Cerberus-cpp does not do this in-place. Instead you need to use the validator's :code:`getDocument()` method to
+access the normalized document.
+
+.. literalinclude:: examples/normalization.cc
+   :language: c++
+   :start-after: START
+   :end-before: END
+
+The normalized output document of above example would be :code:`user: John Doe`.
+
+Additionally, the validator class has a configurable policy whether or not unknown fields
+should be purged from the normalized document (can be toggled using the :code:`setPurgeUnknown(value)` method).
+The default is :code:`false`.
+
+This is a list of normalization rules available in cerberus-cpp:
+
+* :code:`default` provides the field's default value
+* :code:`rename` renames a given field in the normalized document
+* :code:`purge_unknown` changes the validators policy regarding purging unknown fields e.g. for a submapping
 
 .. _advanced:
 
