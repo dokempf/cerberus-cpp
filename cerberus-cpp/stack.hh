@@ -23,11 +23,11 @@ namespace Cerberus {
     : public DocumentPathItem
   {
     public:
-    DictLookupItem(const std::string& key)
+    explicit DictLookupItem(const std::string& key)
       : key(key)
     {}
 
-    virtual std::string stringify(const std::string& prefix) const override
+    std::string stringify(const std::string& prefix) const override
     {
       return prefix + ((prefix != "^") ? "." : "") + key;
     }
@@ -40,11 +40,11 @@ namespace Cerberus {
     : public DocumentPathItem
   {
     public:
-    ListEntryItem(std::size_t i)
+    explicit ListEntryItem(std::size_t i)
       : i(i)
     {}
 
-    virtual std::string stringify(const std::string& prefix) const override
+    std::string stringify(const std::string& prefix) const override
     {
       return prefix + "[" + std::to_string(i) + "]";
     }

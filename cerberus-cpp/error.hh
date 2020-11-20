@@ -22,14 +22,14 @@ namespace Cerberus {
   {
     public:
     template<typename V>
-    SchemaError(const V& v)
+    explicit SchemaError(const V& v)
     {
       std::stringstream sstream;
       v.printErrors(sstream);
       message = sstream.str().c_str();
     }
 
-    virtual const char* what() const noexcept override
+    const char* what() const noexcept override
     {
       return message;
     }

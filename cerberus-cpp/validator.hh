@@ -31,7 +31,7 @@ namespace Cerberus {
      * @param schema The schema that this validator should be
      *               validating against.
      */
-    Validator(const YAML::Node& schema)
+    explicit Validator(const YAML::Node& schema)
       : schema_(schema)
       , state(*this, YAML::Node())
       , validate_schema(true)
@@ -232,9 +232,6 @@ namespace Cerberus {
        */
       ValidationRuleInterface(Validator& validator, const YAML::Node& document)
         : validator(validator)
-        , allow_unknown(false)
-        , purge_unknown(false)
-        , require_all(false)
       {
         document_stack.reset(YAML::Clone(document));
       }
@@ -550,9 +547,9 @@ namespace Cerberus {
       private:
       Validator& validator;
       std::vector<ValidationErrorItem> errors;
-      bool allow_unknown;
-      bool purge_unknown;
-      bool require_all;
+      bool allow_unknown = false;
+      bool purge_unknown = false;
+      bool require_all = false;
       std::vector<std::string> field;
     };
 

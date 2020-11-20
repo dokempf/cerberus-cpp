@@ -189,9 +189,8 @@ namespace Cerberus {
         ),
         [](auto& v)
         {
-          if(v.getDocument().IsSequence())
-            if((!v.getSchema().template as<bool>()) && (v.getDocument().size() == 0))
-              v.raiseError("Empty-Rule violated for sequence");
+          if((v.getDocument().IsSequence()) && (!v.getSchema().template as<bool>()) && (v.getDocument().size() == 0))
+            v.raiseError("Empty-Rule violated for sequence");
         }
       );
     }
@@ -293,7 +292,9 @@ namespace Cerberus {
     {
       validator.registerRule(
         YAML::Load("meta: {}"),
-        [](auto&){}
+        [](auto&){
+          // The meta field may carry *any* data, no validation is performed.
+        }
       );
     }
 
