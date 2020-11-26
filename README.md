@@ -25,8 +25,8 @@ It requires the following software to be available:
 
 * A C++14-compliant C++ compiler
 * CMake >= 3.11
-* The [yaml-cpp](https://github.com/jbeder/yaml-cpp) library, e.g. by installing
-  the Debian package `libyaml-cpp-dev`.
+* The [yaml-cpp](https://github.com/jbeder/yaml-cpp) library version >= 0.6, e.g. by installing
+  the Debian/Ubuntu package `libyaml-cpp-dev`.
 
 # Documentation
 

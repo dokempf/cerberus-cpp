@@ -20,7 +20,7 @@ It requires the following software to be available:
 
 * A C++14-compliant C++ compiler
 * CMake >= 3.11
-* The `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ library
+* The `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ library, version >= 0.6
 * git
 
 The easiest way to get yaml-cpp is:
