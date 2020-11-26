@@ -18,6 +18,8 @@ jobs:
       compiler: clang
 
     - name: Sonarcloud
+      os: linux
+      dist: focal
       addons:
         apt:
           packages:
