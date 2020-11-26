@@ -12,7 +12,7 @@ if(DOCS_ONLY)
   set(REQUIRED_STRING "")
 endif()
 
-find_package(yaml-cpp ${REQUIRED_STRING})
+find_package(yaml-cpp 0.6 ${REQUIRED_STRING})
 message("-- yaml-cpp version detected: ${yaml-cpp_VERSION}")
 
 add_subdirectory(cerberus-cpp)
