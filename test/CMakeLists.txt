@@ -20,8 +20,3 @@ foreach(testcase ${testcases})
   add_test(NAME testcustom_${testname}
            COMMAND testcustom ${testcase})
 endforeach()
-
-if(COVERAGE_REPORT)
-  target_compile_options(testvalidation PRIVATE --coverage)
-  target_link_libraries(testvalidation --coverage)
-endif()
