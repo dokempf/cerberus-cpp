@@ -13,7 +13,7 @@ if(DOCS_ONLY)
 endif()
 
 find_package(yaml-cpp ${REQUIRED_STRING})
-find_package(PythonLibs)
+message("-- yaml-cpp version detected: ${yaml-cpp_VERSION}")
 
 add_subdirectory(cerberus-cpp)
 add_subdirectory(doc)
