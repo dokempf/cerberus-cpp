@@ -4,10 +4,6 @@ addons:
   apt:
     packages:
       - libyaml-cpp-dev
-  sonarcloud:
-    organization: "dokempf"
-    token:
-      secure: "PQPdRiIPSZX840YBeOpFp8z4F8oln+dQtILvXg+Rt5W0sEFoEtbuy1lM7i1r/+hnFaIzYi/Ur5vIX5RvVRlOCgQsNLTxr4rKnvKS+mN5zPw+ztOEvi5rA3UHxL6sUgdozSsGvwJCMvMajibHmP48GHnJeXMKlF7qfjofkii2PWlSquS1MZ0ezzEWgZrGxLM23ipeB04ZSHzeByzsIpsE0elIZWR8gVen7Ej7hQ3MsFapcpjLt+/OTdev+i3qX/QL5sQ9XlvMGVzyDCqJSqLIYGFLiAQwwiTM0hRFqro40sOdPhzbT7Ncplr43RIUtFFAuXsf4G85cQeZI5zYJHne5XKawiR4EG2bWZ2JCsL2Vcz41jF0m2xp9uDCD64DiiJv+LNv44llOo4pxmMwSZZ3EbW9Ce5gXuqe/vyIpclbp2r5b6zvK7iZ/B0O04arU62B9t2Egv3w8ZEvuZBpMni4vC/4ktnS76x+EtqfokaGDyVTPG8G6+jHI4O2sBnDkEvWyaRe/jwet64xV3UOAxFwdOr3f4Fa8s9Ym0aTn2mNIFK6VayFzR8sPRiLR1xvijir09HQol5pC76VyZ3yQEmMHkH4ojAxMkPjb+1tTSRZn4Et/pfNWeIKRBdTEobpL17wBNmnw0BqwFiYZOg0wRvOnlFimLcXmfWVcemiYUb8ER4="
 
 jobs:
   include:
@@ -23,6 +19,9 @@ jobs:
 
     - name: Sonarcloud
       addons:
+        apt:
+          packages:
+            - libyaml-cpp-dev
         sonarcloud:
           organization: "dokempf"
           token:
