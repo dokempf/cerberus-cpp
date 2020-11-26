@@ -34,7 +34,7 @@ jobs:
         - cmake -DCMAKE_CXX_STANDARD=14 -DCOVERAGE_REPORT=ON ..
         # Wraps the compilation with the Build Wrapper to generate configuration (used
         # later by the SonarScanner) into the "bw-output" folder
-        - build-wrapper-linux-x86-64 --out-dir bw-output make -j2 build_tests
+        - build-wrapper-linux-x86-64 --out-dir bw-output make -j2 examples build_tests
         - ctest
         - mkdir gcov-report
         - cd gcov-report
