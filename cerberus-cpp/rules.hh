@@ -279,9 +279,9 @@ namespace cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack.push_back(item.first);
+            v.getDocumentStack().push_back(item.first);
             v.validateItem(v.getSchema());
-            v.document_stack.pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
@@ -569,9 +569,9 @@ namespace cerberus {
           {
             for(std::size_t counter = 0; counter < v.getDocument().size(); ++counter)
             {
-              v.document_stack.pushListItem(counter);
+              v.getDocumentStack().pushListItem(counter);
               v.validateItem(v.getSchema(0, true));
-              v.document_stack.pop();
+              v.getDocumentStack().pop();
             }
 
           }
@@ -625,9 +625,9 @@ namespace cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack.push_back(item.second);;
+            v.getDocumentStack().push_back(item.second);;
             v.validateItem(v.getSchema(0, true));
-            v.document_stack.pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
