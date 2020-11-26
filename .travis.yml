@@ -32,7 +32,7 @@ jobs:
       script:
         - mkdir build
         - cd build
-        - cmake -DCMAKE_CXX_STANDARD=14 -DCMAKE_CXX_FLAGS="--coverage" ..
+        - cmake -DCMAKE_CXX_FLAGS="--coverage" ..
         # Wraps the compilation with the Build Wrapper to generate configuration (used
         # later by the SonarScanner) into the "bw-output" folder
         - build-wrapper-linux-x86-64 --out-dir bw-output make -j2 build_tests
@@ -52,6 +52,6 @@ jobs:
 script:
   - mkdir build
   - cd build
-  - cmake -DCMAKE_CXX_STANDARD=14 ..
+  - cmake ..
   - make -j2 build_tests
   - ctest

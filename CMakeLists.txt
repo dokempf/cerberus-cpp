@@ -2,6 +2,9 @@ project(cerberus-cpp LANGUAGES CXX)
 
 cmake_minimum_required(VERSION 3.11)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 include(CTest)
 
 # When building documentation from readthedocs.io, we need to
