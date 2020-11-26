@@ -257,11 +257,11 @@ namespace cerberus {
           auto datait = v.getDocument().begin();
           while (schemait != v.getSchema().end())
           {
-            v.document_stack.push_back(*(datait++));
-            v.schema_stack.push_back(*(schemait++));
+            v.getDocumentStack().push_back(*(datait++));
+            v.getSchemaStack().push_back(*(schemait++));
             v.validateItem(v.getSchema(0, true));
-            v.schema_stack.pop_back();
-            v.document_stack.pop_back();
+            v.getSchemaStack().pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
