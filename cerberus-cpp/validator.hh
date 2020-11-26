@@ -15,7 +15,7 @@
 #include<string>
 #include<tuple>
 
-namespace Cerberus {
+namespace cerberus {
 
 
   class Validator
@@ -34,7 +34,6 @@ namespace Cerberus {
     explicit Validator(const YAML::Node& schema)
       : schema_(schema)
       , state(*this, YAML::Node())
-      , validate_schema(true)
     {
       registerBuiltinRules(*this);
       registerBuiltinTypes(*this);
@@ -539,12 +538,21 @@ namespace Cerberus {
         return field.back();
       }
 
-      // TODO: These should move to private. In order to do so, all rules implementations
-      //       need to go through one of the above interfaces.
-      DocumentStack schema_stack;
-      DocumentStack document_stack;
+      //! Access the document stack object
+      DocumentStack& getDocumentStack()
+      {
+        return document_stack;
+      }
+
+      //! Access the schema stack object
+      DocumentStack& getSchemaStack()
+      {
+        return schema_stack;
+      }
 
       private:
+      DocumentStack schema_stack;
+      DocumentStack document_stack;
       Validator& validator;
       std::vector<ValidationErrorItem> errors;
       bool allow_unknown = false;
@@ -563,7 +571,7 @@ namespace Cerberus {
     // The schema that is used to validate user provided schemas.
     // This is update with snippets as rules are registered
     YAML::Node schema_schema;
-    bool validate_schema;
+    bool validate_schema = true;
   };
 
   //! overload stream operator for easy printing of errors
@@ -574,6 +582,6 @@ namespace Cerberus {
     return stream;
   }
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif

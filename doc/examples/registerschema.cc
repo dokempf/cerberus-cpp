@@ -18,7 +18,7 @@ int main()
   document["name"] = "Me";
 
   // START
-  Cerberus::Validator validator;
+  cerberus::Validator validator;
   validator.registerSchema("user", schema);
   if (!validator.validate(document, "user"))
     std::cerr << validator << std::endl;

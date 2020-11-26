@@ -5,7 +5,7 @@
 #include<sstream>
 #include<string>
 
-namespace Cerberus {
+namespace cerberus {
 
   //! A base class for exceptions thrown from Cerberus
   class CerberusError
@@ -45,6 +45,6 @@ namespace Cerberus {
     std::string message;
   };
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif

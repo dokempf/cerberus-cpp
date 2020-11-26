@@ -49,7 +49,7 @@ int main()
   document["when"] = "2001";
 
   // START_REG
-  Cerberus::Validator validator;
+  cerberus::Validator validator;
   validator.registerType<SimpleDate>("date");
   // END_REG
   if (!validator.validate(document, schema)) 

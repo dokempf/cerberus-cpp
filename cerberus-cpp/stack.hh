@@ -11,7 +11,7 @@
 #include<iostream>
 
 
-namespace Cerberus {
+namespace cerberus {
 
   class DocumentPathItem
   {
@@ -174,6 +174,6 @@ namespace Cerberus {
     std::vector<std::shared_ptr<DocumentPathItem>> path;
   };
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif

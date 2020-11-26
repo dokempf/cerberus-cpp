@@ -15,7 +15,7 @@ int main()
   document["value"] = 37;
 
   // START
-  Cerberus::Validator validator;
+  cerberus::Validator validator;
   validator.registerRule(
     YAML::Load(
       "oddity:            \n"

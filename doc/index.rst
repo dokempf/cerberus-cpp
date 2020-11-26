@@ -18,7 +18,7 @@ Installation
 Cerberus-cpp is header-only, so it should be fairly easy to get up and running.
 It requires the following software to be available:
 
-* A C++11-compliant C++ compiler
+* A C++14-compliant C++ compiler
 * CMake >= 3.11
 * The `yaml-cpp <https://github.com/jbeder/yaml-cpp>`_ library
 * git
@@ -69,7 +69,7 @@ Basic Usage
 Validation
 ----------
 
-The most important component provided by cerberus-cpp is the :code:`Cerberus::Validator` class.
+The most important component provided by cerberus-cpp is the :code:`cerberus::Validator` class.
 An instance of this validator is given a schema and a document. The document is then validated
 against this schema using the :code:`validate` method - returning a boolean value indicating success.
 If the validation process fails, the errors can be written to a stream using the validator's
@@ -77,7 +77,7 @@ If the validation process fails, the errors can be written to a stream using the
 
 .. code-block:: c++
 
-   Cerberus::Validator validator;
+   cerberus::Validator validator;
    if(!validator.validate(document, schema))
      std::cerr << validator << std::endl;
 
@@ -154,7 +154,7 @@ Advanced Usage
 
 This section is only relevant to users who seek to enhance the capabilities of
 cerberus-cpp by e.g. providing custom rules and types. All customizations described
-in this documentation operate on instances of :code:`Cerberus::Validator`. You may
+in this documentation operate on instances of :code:`cerberus::Validator`. You may
 also apply these in the constructor of a derived class.
 
 .. _custom_rule:
@@ -162,7 +162,7 @@ also apply these in the constructor of a derived class.
 Custom Validation Rules
 -----------------------
 
-Custom validation rules can be registered on instances of :code:`Cerberus::Validator`.
+Custom validation rules can be registered on instances of :code:`cerberus::Validator`.
 This is an example that registers a custom rule :code:`oddity` that only accepts odd
 integer values:
 
@@ -192,10 +192,10 @@ derived validator classes. In our example, only the most relevant methods of the
 Some rules require to be applied before or after certain other rules in order to
 implement the correct semantics. Cerberus-cpp gives control over this by providing
 a number of hooks, when rules execute. The hook at which a custom rule executes can
-be controlled by passing a third argument. The enumeration :code:`Cerberus::RulePriority`
+be controlled by passing a third argument. The enumeration :code:`cerberus::RulePriority`
 lists the possible values:
 
-.. doxygenenum:: Cerberus::RulePriority
+.. doxygenenum:: cerberus::RulePriority
 
 .. _custom_type:
 
@@ -327,7 +327,7 @@ If you do not intend to implement custom rules, there is no need to understand t
 Validator API
 -------------
 
-.. doxygenclass:: Cerberus::Validator
+.. doxygenclass:: cerberus::Validator
    :members:
 
 .. _rule_api:
@@ -335,7 +335,7 @@ Validator API
 ValidationRuleInterface API
 ---------------------------
 
-.. doxygenclass:: Cerberus::Validator::ValidationRuleInterface
+.. doxygenclass:: cerberus::Validator::ValidationRuleInterface
    :members:
 
 .. _contributing:

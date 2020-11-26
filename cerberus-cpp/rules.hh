@@ -10,7 +10,7 @@
 
 #include<iostream>
 
-namespace Cerberus {
+namespace cerberus {
 
   /** @brief Definition of rule priorities (or hooks) that exist in the validation process */
   enum class RulePriority
@@ -257,11 +257,11 @@ namespace Cerberus {
           auto datait = v.getDocument().begin();
           while (schemait != v.getSchema().end())
           {
-            v.document_stack.push_back(*(datait++));
-            v.schema_stack.push_back(*(schemait++));
+            v.getDocumentStack().push_back(*(datait++));
+            v.getSchemaStack().push_back(*(schemait++));
             v.validateItem(v.getSchema(0, true));
-            v.schema_stack.pop_back();
-            v.document_stack.pop_back();
+            v.getSchemaStack().pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
@@ -279,9 +279,9 @@ namespace Cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack.push_back(item.first);
+            v.getDocumentStack().push_back(item.first);
             v.validateItem(v.getSchema());
-            v.document_stack.pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
@@ -569,9 +569,9 @@ namespace Cerberus {
           {
             for(std::size_t counter = 0; counter < v.getDocument().size(); ++counter)
             {
-              v.document_stack.pushListItem(counter);
+              v.getDocumentStack().pushListItem(counter);
               v.validateItem(v.getSchema(0, true));
-              v.document_stack.pop();
+              v.getDocumentStack().pop();
             }
 
           }
@@ -625,9 +625,9 @@ namespace Cerberus {
         {
           for(auto item: v.getDocument())
           {
-            v.document_stack.push_back(item.second);;
+            v.getDocumentStack().push_back(item.second);;
             v.validateItem(v.getSchema(0, true));
-            v.document_stack.pop_back();
+            v.getDocumentStack().pop_back();
           }
         }
       );
@@ -667,6 +667,6 @@ namespace Cerberus {
     impl::valuesrules_rule(v);
   }
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif
