@@ -39,6 +39,7 @@ jobs:
         - mkdir gcov-report
         - cd gcov-report
         - gcov -p ../test/CMakeFiles/testvalidation.dir/testvalidation.cc.gcno > /dev/null
+        - find . -type f ! -name '*cerberus-cpp#cerberus-cpp#*.hh.gcov' -delete
         - cd ../..
         # And finally run the SonarCloud analysis - read the "sonar-project.properties"
         # file to see the specific configuration
