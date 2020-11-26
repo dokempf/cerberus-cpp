@@ -18,6 +18,8 @@ jobs:
       compiler: clang
 
     - name: Sonarcloud
+      os: linux
+      dist: focal
       addons:
         apt:
           packages:
@@ -29,11 +31,15 @@ jobs:
       script:
         - mkdir build
         - cd build
-        - cmake -DCMAKE_CXX_STANDARD=14 ..
+        - cmake -DCMAKE_CXX_STANDARD=14 -DCMAKE_CXX_FLAGS="--coverage" ..
         # Wraps the compilation with the Build Wrapper to generate configuration (used
         # later by the SonarScanner) into the "bw-output" folder
-        - build-wrapper-linux-x86-64 --out-dir bw-output make -j2 examples
-        - cd ..
+        - build-wrapper-linux-x86-64 --out-dir bw-output make -j2 build_tests
+        - ctest
+        - mkdir gcov-report
+        - cd gcov-report
+        - gcov -p ../test/CMakeFiles/testvalidation.dir/testvalidation.cc.gcno > /dev/null
+        - cd ../..
         # And finally run the SonarCloud analysis - read the "sonar-project.properties"
         # file to see the specific configuration
         - sonar-scanner
