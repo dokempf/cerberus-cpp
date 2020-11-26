@@ -1,3 +1,7 @@
+[![CI Status](https://travis-ci.com/dokempf/cerberus-cpp.svg?branch=master)](https://travis-ci.com/dokempf/cerberus-cpp.svg?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/cerberus-cpp/badge/?version=latest)](https://cerberus-cpp.readthedocs.io/en/latest/?badge=latest)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dokempf_cerberus-cpp&metric=alert_status)](https://sonarcloud.io/dashboard?id=dokempf_cerberus-cpp)
+
 # What is cerberus-cpp
 
 cerberus-cpp is a schema validation tool for YAML data written in C++.
@@ -29,8 +33,6 @@ It requires the following software to be available:
   the Debian/Ubuntu package `libyaml-cpp-dev`.
 
 # Documentation
-
-[![Documentation Status](https://readthedocs.org/projects/cerberus-cpp/badge/?version=latest)](https://cerberus-cpp.readthedocs.io/en/latest/?badge=latest)
 
 For usage examples, detailed instructions and an overview on the compatibility
 with the Python package, check out the
