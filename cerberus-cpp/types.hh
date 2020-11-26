@@ -4,7 +4,7 @@
 #include<yaml-cpp/yaml.h>
 #include<string>
 
-namespace Cerberus {
+namespace cerberus {
 
   /** @brief Abstract base class that represents a type in the validation process
    * 
@@ -71,6 +71,6 @@ namespace Cerberus {
     validator.template registerType<bool>("boolean");
   }
 
-} // namespace Cerberus 
+} // namespace cerberus
 
 #endif

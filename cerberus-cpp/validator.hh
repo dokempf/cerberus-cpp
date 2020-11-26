@@ -15,7 +15,7 @@
 #include<string>
 #include<tuple>
 
-namespace Cerberus {
+namespace cerberus {
 
 
   class Validator
@@ -574,6 +574,6 @@ namespace Cerberus {
     return stream;
   }
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif

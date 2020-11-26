@@ -13,7 +13,7 @@ int main()
     "  rename: user         \n"
   );
 
-  Cerberus::Validator validator(schema);
+  cerberus::Validator validator(schema);
   if (validator.validate(YAML::Node()))
     std::cout << "The normalized document: " << validator.getDocument() << std::endl;
   else

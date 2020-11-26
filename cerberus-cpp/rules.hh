@@ -10,7 +10,7 @@
 
 #include<iostream>
 
-namespace Cerberus {
+namespace cerberus {
 
   /** @brief Definition of rule priorities (or hooks) that exist in the validation process */
   enum class RulePriority
@@ -667,6 +667,6 @@ namespace Cerberus {
     impl::valuesrules_rule(v);
   }
 
-} // namespace Cerberus
+} // namespace cerberus
 
 #endif

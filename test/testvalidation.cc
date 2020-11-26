@@ -6,6 +6,6 @@
 int main(int argc, char** argv)
 {
   auto input = YAML::LoadFile(argv[1]);
-  Cerberus::Validator validator;
+  cerberus::Validator validator;
   return check(validator, input);
 }

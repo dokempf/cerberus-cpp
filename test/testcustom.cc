@@ -5,7 +5,7 @@
 
 // For now this is only a different class - nothing fancy
 class CustomValidator
-  : public Cerberus::Validator
+  : public cerberus::Validator
 {};
 
 

@@ -16,7 +16,7 @@ int main()
   YAML::Node document;
   document["question"] = "What is 6x9?";
 
-  Cerberus::Validator validator(schema);
+  cerberus::Validator validator(schema);
   if (validator.validate(document))
   {
     YAML::Node doc = validator.getDocument();
