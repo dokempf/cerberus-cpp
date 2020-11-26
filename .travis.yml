@@ -24,6 +24,7 @@ jobs:
         apt:
           packages:
             - libyaml-cpp-dev
+            - lcov
         sonarcloud:
           organization: "dokempf"
           token:
