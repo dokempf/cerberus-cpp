@@ -43,6 +43,10 @@ jobs:
         # And finally run the SonarCloud analysis - read the "sonar-project.properties"
         # file to see the specific configuration
         - sonar-scanner
+        # Also upload to codecov.io
+        - lcov --directory ./build/test/CMakeFiles/testvalidation.dir --capture --output-file coverage.info
+        - lcov --remove coverage.info '/usr/*' './build/test/*' --output-file coverage.info
+        - bash <(curl -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
 
 script:
   - mkdir build
