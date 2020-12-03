@@ -30,7 +30,19 @@ namespace cerberus {
   };
 
   namespace impl {
-    
+
+    //! A small helper that allows unified treatment of scalars and lists
+    std::vector<YAML::Node> as_list(YAML::Node& node)
+    {
+      std::vector<YAML::Node> result;
+      if(node.IsScalar())
+        result.push_back(node);
+      if(node.IsSequence())
+        for(auto i : node)
+          result.push_back(i);
+      return result;
+    }
+
     template<typename Validator>
     void allow_unknown_rule(Validator& validator)
     {
@@ -98,13 +110,7 @@ namespace cerberus {
         ),
         [](auto& v)
         {
-          std::vector<YAML::Node> needed;
-          if(v.getSchema().IsScalar())
-            needed.push_back(v.getSchema());
-          if(v.getSchema().IsSequence())
-            for(auto item: v.getSchema())
-              needed.push_back(item);
-
+          auto needed = as_list(v.getSchema());
           for(auto item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
               if (v.getType("string")->equality(*it, item))
@@ -154,13 +160,7 @@ namespace cerberus {
               if(!lookup.IsDefined())
                 v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " required!");
 
-              std::vector<YAML::Node> possible;
-              if(dep.second.IsScalar())
-                possible.push_back(dep.second);
-              if(dep.second.IsSequence())
-                for (auto i : dep.second)
-                  possible.push_back(i);
-
+              auto possible = as_list(dep.second);
               bool found = false;
               for (auto val : possible)
                 if(v.getType("string")->equality(lookup, val))
@@ -170,21 +170,16 @@ namespace cerberus {
               {
                 std::string options;
                 for(auto o: possible)
-                  options = options + o.as<std::string>() + ", ";
+                  options = options + o.template as<std::string>() + ", ";
                 v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value out of [" + options + "]");
               }
             }
             return;
           }
           
-          YAML::Node deplist;
-          if(v.getSchema().IsScalar())
-            deplist[0] = v.getSchema();
-          if(v.getSchema().IsSequence())
-            deplist = v.getSchema();
-
+          auto deplist = as_list(v.getSchema());
           for(auto dep: deplist)
-            if(!v.getDocumentPath(dep.as<std::string>(), 1).IsDefined())
+            if(!v.getDocumentPath(dep.template as<std::string>(), 1).IsDefined())
               v.raiseError("dependencies-Rule violated: " + dep.template as<std::string>() + " required!");
         }
       );
@@ -222,14 +217,9 @@ namespace cerberus {
           if(!v.getDocument().IsDefined())
             return;
 
-          YAML::Node exclist;
-          if(v.getSchema().IsScalar())
-            exclist[0] = v.getSchema();
-          if(v.getSchema().IsSequence())
-            exclist = v.getSchema();
-
+          auto exclist = as_list(v.getSchema());
           for(auto exc: exclist)
-            if(v.getDocumentPath(exc.as<std::string>(), 1).IsDefined())
+            if(v.getDocumentPath(exc.template as<std::string>(), 1).IsDefined())
               v.raiseError("excludes-Rule violated: " + exc.template as<std::string>() + " is not allowed!");
         }
       );
@@ -603,25 +593,22 @@ namespace cerberus {
           if((v.getDocument().IsNull()) || (!v.getDocument().IsDefined()))
             return;
 
-          std::vector<std::string> allowed_types;
-          if(v.getSchema().IsScalar())
-            allowed_types.push_back(v.getSchema().template as<std::string>());
-          if(v.getSchema().IsSequence())
-            for(auto t : v.getSchema())
-              allowed_types.push_back(t.template as<std::string>());
-
+          auto allowed_types = as_list(v.getSchema());
           // If a list is permitted and a list is given - we are good!
-          if((std::find(allowed_types.begin(), allowed_types.end(), "list") != allowed_types.end()) && (v.getDocument().IsSequence()))
+          if((std::find_if(allowed_types.begin(), allowed_types.end(), [](auto t){ return t.template as<std::string>() == "list"; }) != allowed_types.end()) && (v.getDocument().IsSequence()))
             return;
 
           // If a dict is permitted and a dict is given - we are good!
-          if((std::find(allowed_types.begin(), allowed_types.end(), "dict") != allowed_types.end()) && (v.getDocument().IsMap()))
+          if((std::find_if(allowed_types.begin(), allowed_types.end(), [](auto t){ return t.template as<std::string>() == "dict"; }) != allowed_types.end()) && (v.getDocument().IsMap()))
             return;
 
           bool found_type = false;
           for(auto t : allowed_types)
-            if((t != "list") && (t != "dict") && (v.getType(t)->is_convertible(v.getDocument())))
+          {
+            std::string tstr = t.template as<std::string>();
+            if((tstr != "list") && (tstr != "dict") && (v.getType(tstr)->is_convertible(v.getDocument())))
               found_type = true;
+          }
 
           if (!found_type)
             v.raiseError("Type-Rule violated");
