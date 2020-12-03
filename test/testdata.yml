@@ -108,6 +108,27 @@ dependencies-dict:
     - field1: bar
       field2: foo
     - field2: foo
+dependencies-dict-with-list:
+  schema:
+    field1:
+      required: false
+    field2:
+      required: false
+      dependencies:
+        field1:
+          - foo
+          - bar
+  success:
+    - {}
+    - field1: abc
+    - field1: foo
+      field2: abc
+    - field1: bar
+      field2: abc
+  failure:
+    - field1: other
+      field2: abc
+    - field2: abc
 dependencies-list:
   schema:
     field1:

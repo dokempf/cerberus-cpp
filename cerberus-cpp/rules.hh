@@ -153,8 +153,26 @@ namespace cerberus {
               auto lookup = v.getDocumentPath(dep.first.template as<std::string>(), 1);
               if(!lookup.IsDefined())
                 v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " required!");
-              if(!v.getType("string")->equality(lookup, dep.second))
-                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value " + dep.second.template as<std::string>());
+
+              std::vector<YAML::Node> possible;
+              if(dep.second.IsScalar())
+                possible.push_back(dep.second);
+              if(dep.second.IsSequence())
+                for (auto i : dep.second)
+                  possible.push_back(i);
+
+              bool found = false;
+              for (auto val : possible)
+                if(v.getType("string")->equality(lookup, val))
+                  found = true;
+
+              if(!found)
+              {
+                std::string options;
+                for(auto o: possible)
+                  options = options + o.as<std::string>() + ", ";
+                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value out of [" + options + "]");
+              }
             }
             return;
           }
