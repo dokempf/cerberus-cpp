@@ -193,7 +193,10 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "excludes: {}"
+          "excludes:     \n"
+          "  type:       \n"
+          "    - string  \n"
+          "    - list    \n"
         ),
         [](auto& v)
         {
@@ -204,13 +207,8 @@ namespace cerberus {
           YAML::Node exclist;
           if(v.getSchema().IsScalar())
             exclist[0] = v.getSchema();
-          else if(v.getSchema().IsSequence())
+          if(v.getSchema().IsSequence())
             exclist = v.getSchema();
-          else
-          {
-            v.raiseError("excludes rule called with unknown data");
-            return;
-          }
 
           for(auto exc: exclist)
             if(v.getDocumentPath(exc.as<std::string>(), 1).IsDefined())
