@@ -107,6 +107,7 @@ dependencies-dict:
   failure:
     - field1: bar
       field2: foo
+    - field2: foo
 dependencies-list:
   schema:
     field1:
