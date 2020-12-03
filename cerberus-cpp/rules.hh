@@ -162,13 +162,8 @@ namespace cerberus {
           YAML::Node deplist;
           if(v.getSchema().IsScalar())
             deplist[0] = v.getSchema();
-          else if(v.getSchema().IsSequence())
+          if(v.getSchema().IsSequence())
             deplist = v.getSchema();
-          else
-          {
-            v.raiseError("dependencies rule with unknown data");
-            return;
-          }
 
           for(auto dep: deplist)
             if(!v.getDocumentPath(dep.as<std::string>(), 1).IsDefined())
