@@ -1,0 +1,432 @@
+allow_unknown-simple:
+  schema:
+    field:
+      type: dict
+      schema:
+        sub:
+          type: string
+      allow_unknown: true
+  success:
+    - field:
+        sub: abc
+        other: def
+  failure:
+    - other: foo
+allowed-list:
+  schema:
+    models:
+      type: list
+      schema:
+        type: string
+        allowed:
+          - linear
+          - nonlinear
+  success:
+    - models:
+      - linear
+    - models:
+      - linear
+      - nonlinear
+  failure:
+    - models:
+      - weird
+    - models:
+      - linear
+      - weird
+    - models:
+      - nonlinear
+      - weird
+allowed-simple:
+  schema:
+    model:
+      type: string
+      allowed:
+        - linear
+        - nonlinear
+  success:
+    - model: linear
+    - model: nonlinear
+  failure:
+    - model: weird
+contains-list:
+  schema:
+    users:
+      type: list
+      contains:
+        - admin
+        - root
+  success:
+    - users:
+      - user
+      - root
+      - admin
+  failure:
+    - users:
+      - user
+      - other
+    - users:
+      - user
+      - root
+    - users:
+      - admin
+      - user
+contains-simple:
+  schema:
+    users:
+      type: list
+      contains: admin
+  success:
+    - users:
+      - user
+      - root
+      - admin
+  failure:
+    - users:
+      - user
+      - root
+default-simple:
+  schema:
+    uuid:
+      type: integer
+      default: 1042
+  success:
+    - {}
+dependencies-dict:
+  schema:
+    field1:
+      required: false
+    field2:
+      required: false
+      dependencies:
+        field1: foo
+  success:
+    - {}
+    - field1: bar
+    - field1: foo
+      field2: bar
+  failure:
+    - field1: bar
+      field2: foo
+dependencies-list:
+  schema:
+    field1:
+      required: false
+    field2:
+      required: false
+    field3:
+      required: false
+      dependencies:
+        - field1
+        - field2
+  success:
+    - {}
+    - field1: foo
+      field2: bar
+    - field1: foo
+      field2: bar
+      field3: juhu
+  failure:
+    - field2: bar
+      field3: juhu
+    - field3: juhu
+    - field1: foo
+      field3: juhu
+dependencies-root:
+  schema:
+    nested:
+      type: dict
+      schema:
+        field2:
+          required: false
+          dependencies: ^other.field1
+    other:
+      type: dict
+      schema:
+        field1:
+          required: false
+  success:
+    - {}
+    - other:
+        field1: foo
+    - other:
+        field1: foo
+      nested:
+        field2: bar
+  failure:
+    - nested:
+        field2: bar
+dependencies-simple:
+  schema:
+    field1:
+      required: false
+    field2:
+      required: false
+      dependencies: field1
+  success:
+    - {}
+    - field1: foo
+    - field1: foo
+      field2: bar
+  failure:
+    - field2: bar
+empty-simple:
+  schema:
+    mylist:
+      type: list
+      empty: false
+  success:
+    - mylist: [42]
+  failure:
+    - mylist: []
+excludes-list:
+  schema:
+    field:
+      required: false
+      excludes: other
+    other:
+      required: false
+  success:
+    - {}
+    - field: foo
+    - other: bar
+  failure:
+    - field: foo
+      other: bar
+excludes-simple:
+  schema:
+    field:
+      required: false
+      excludes: other
+    other:
+      required: false
+  success:
+    - {}
+    - field: foo
+    - other: bar
+  failure:
+    - field: foo
+      other: bar
+forbidden-simple:
+  schema:
+    user:
+      type: string
+      forbidden:
+        - admin
+        - root
+  success:
+    - user: foo
+  failure:
+    - user: admin
+    - user: root
+items-simple:
+  schema:
+    field:
+      type: list
+      items:
+        - type: integer
+        - type: string
+  success:
+    - field:
+      - 42
+      - foobar
+  failure:
+    - field:
+      - foo
+      - bar
+keysrules-simple:
+  schema:
+    users:
+      type: dict
+      keysrules:
+        type: string
+        forbidden:
+          - admin
+  success:
+    - users:
+        me:
+          some: data
+  failure:
+    - users:
+        admin: {}
+min-simple:
+  schema:
+    uuid:
+      type: integer
+      min: 1000
+  success:
+    - uuid: 1042
+  failure:
+    - uuid: 950
+minlength-dict-simple:
+  schema:
+    field:
+      type: dict
+      minlength: 2
+  success:
+    - field:
+        foo: 42
+        bar: 42
+  failure:
+    - field:
+        foo: 42
+minlength-list-simple:
+  schema:
+    field:
+      type: list
+      minlength: 2
+      schema:
+        type: integer
+  success:
+    - field:
+      - 2
+      - 4
+  failure:
+    - field:
+      - 2
+nonschema-field:
+  # Unless requested, fields in the schema should not be required
+  schema:
+    foo:
+      type: string
+    bar:
+      type: string
+  success:
+    - foo: bar
+nullable-simple:
+  schema:
+    field:
+      nullable: true
+      type: string
+  success:
+    - field: ~
+    - field: foo
+nullable-without:
+  # This test just asserts that the default setting on the nullable
+  # rule works correctly.
+  schema:
+    field:
+      type: string
+  failure:
+    - field: ~
+purge_unknown-simple:
+  purge_unknown: true
+  schema:
+    field:
+      type: string
+  success:
+    - field: foo
+      other: bar
+regex-simple:
+  schema:
+    email:
+      type: string
+      regex: ^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$
+  success:
+    - email: dominic.kempf@iwr.uni-heidelberg.de
+  failure:
+    - email: dominic.kempfiwr.uni-heidelberg.de
+    - email: dominic.kempf@iwruni-heidelbergde
+rename-simple:
+  schema:
+    foo:
+      type: string
+      rename: bar
+  success:
+    - foo: bla
+require_all-simple:
+  schema:
+    foo:
+      type: dict
+      require_all: true
+      schema:
+        sub1:
+          type: string
+        sub2:
+          type: string
+    bar:
+      type: string
+  success:
+    - foo:
+        sub1: bla
+        sub2: laber
+  failure:
+    - foo:
+        sub1: bla
+    - foo:
+        sub2: laber
+required-simple:
+  schema:
+    uuid:
+      type: integer
+      required: true
+  success:
+    - uuid: 1042
+  failure:
+    - {}
+schema-dict-default:
+  schema:
+    user:
+      type: dict
+      schema:
+        uuid:
+          type: integer
+          default: 1042
+  success:
+    - {}  
+schema-dict-registry:
+  schema:
+    group:
+      type: dict
+      schema: foo
+  registry:
+    foo:
+      user:
+        type: string
+  success:
+    - group:
+        user: me
+  failure:
+    - group:
+        foo: bar
+schema-dict-simple:
+  schema:
+    user:
+      type: dict
+      schema:
+        uuid:
+          type: integer
+          required: true
+  success:
+    - user:
+        uuid: 1042
+  failure:
+    - user: {}
+schema-list-simple:
+  schema:
+    field:
+      type: list
+      schema:
+        type: integer
+  success:
+    - field:
+      - 2
+      - 4
+  failure:
+    - field:
+      - foo
+      - bar
+valuesrules-simple:
+  schema:
+    roles:
+      type: dict
+      valuesrules:
+        type: string
+        forbidden:
+          - admin
+  success:
+    - roles:
+        me: user
+  failure:
+    - roles:
+        me: user
+        somebody: admin

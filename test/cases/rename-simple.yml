@@ -1,6 +1,0 @@
-schema:
-  foo:
-    type: string
-    rename: bar
-success:
-  - foo: bla

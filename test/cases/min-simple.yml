@@ -1,8 +1,0 @@
-schema:
-  uuid:
-    type: integer
-    min: 1000
-success:
-  - uuid: 1042
-failure:
-  - uuid: 950

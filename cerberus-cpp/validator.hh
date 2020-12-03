@@ -206,8 +206,7 @@ namespace cerberus {
      *
      * This also accessible through the overloaded stream @c operator<<.
      */
-    template<typename Stream>
-    void printErrors(Stream& stream) const
+    void printErrors(std::ostream& stream) const
     {
       return state.printErrors(stream);
     }
@@ -345,8 +344,8 @@ namespace cerberus {
       {
         for(auto error: errors)
         {
-          stream << "Error validating data field " << error.path << std::endl;
-          stream << "Message: " << error.message << std::endl;
+          stream << "Error validating data field " << error.path << "\n";
+          stream << "Message: " << error.message << "\n";
         }
       }
 
@@ -575,8 +574,7 @@ namespace cerberus {
   };
 
   //! overload stream operator for easy printing of errors
-  template<typename Stream>
-  Stream& operator<<(Stream& stream, const Validator& v)
+  std::ostream& operator<<(std::ostream& stream, const Validator& v)
   {
     v.printErrors(stream);
     return stream;

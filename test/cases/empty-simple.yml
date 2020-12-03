@@ -1,8 +1,0 @@
-schema:
-  mylist:
-    type: list
-    empty: false
-success:
-  - mylist: [42]
-failure:
-  - mylist: []

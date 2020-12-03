@@ -1,9 +1,0 @@
-schema:
-  email:
-    type: string
-    regex: ^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$
-success:
-  - email: dominic.kempf@iwr.uni-heidelberg.de
-failure:
-  - email: dominic.kempfiwr.uni-heidelberg.de
-  - email: dominic.kempf@iwruni-heidelbergde

@@ -1,7 +1,0 @@
-purge_unknown: true
-schema:
-  field:
-    type: string
-success:
-  - field: foo
-    other: bar
