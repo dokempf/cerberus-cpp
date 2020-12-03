@@ -5,12 +5,12 @@
 #include<yaml-cpp/yaml.h>
 
 static const YAML::Node testdata = YAML::LoadFile("testdata.yml");
+static const YAML::Node illschemas = YAML::LoadFile("illformedschemas.yml");
 
 // For now this is only a different class - nothing fancy
 class CustomValidator
   : public cerberus::Validator
 {};
-
 
 TEMPLATE_TEST_CASE("Performing standard validation", "[validate]", cerberus::Validator, CustomValidator) {
   TestType validator;
@@ -39,6 +39,17 @@ TEMPLATE_TEST_CASE("Performing standard validation", "[validate]", cerberus::Val
         INFO(validator);
         REQUIRE(result == dataset.second);
       }
+    }
+  }
+}
+
+TEST_CASE("Faulty schema throws error", "[error]") {
+  cerberus::Validator validator;
+  for(auto testcase : illschemas)
+  {
+    auto name = testcase.first;
+    SECTION(name.as<std::string>()) {
+      REQUIRE_THROWS_AS(validator.validate(YAML::Node(), testcase.second), cerberus::SchemaError);
     }
   }
 }

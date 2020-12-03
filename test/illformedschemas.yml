@@ -1,0 +1,17 @@
+unknown-rule:
+  foo:
+    type: integer
+    foobar: true
+contains-value-or-list:
+  foo:
+    type: list
+    contains:
+      foo: 42
+minlength-on-scalar:
+  foo:
+    type: integer
+    minlength: 1
+maxlength-on-scalar:
+  foo:
+    type: integer
+    minlength: 1

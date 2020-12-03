@@ -7,3 +7,4 @@ if(BUILD_TESTING)
 endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testdata.yml ${CMAKE_CURRENT_BINARY_DIR}/testdata.yml)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/illformedschemas.yml ${CMAKE_CURRENT_BINARY_DIR}/illformedschemas.yml)

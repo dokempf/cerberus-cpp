@@ -3,6 +3,7 @@
 
 #include<yaml-cpp/yaml.h>
 
+#include<algorithm>
 #include<memory>
 #include<regex>
 #include<string>
@@ -30,7 +31,19 @@ namespace cerberus {
   };
 
   namespace impl {
-    
+
+    //! A small helper that allows unified treatment of scalars and lists
+    std::vector<YAML::Node> as_list(const YAML::Node& node)
+    {
+      std::vector<YAML::Node> result;
+      if(node.IsScalar())
+        result.push_back(node);
+      if(node.IsSequence())
+        for(auto i : node)
+          result.push_back(i);
+      return result;
+    }
+
     template<typename Validator>
     void allow_unknown_rule(Validator& validator)
     {
@@ -91,22 +104,14 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "contains: {}"
+          "contains:   \n"
+          "  type:     \n"
+          "    - string\n"
+          "    - list  \n"
         ),
         [](auto& v)
         {
-          std::vector<YAML::Node> needed;
-          if(v.getSchema().IsScalar())
-            needed.push_back(v.getSchema());
-          else if(v.getSchema().IsSequence())
-            for(auto item: v.getSchema())
-              needed.push_back(item);
-          else
-          {
-            v.raiseError("Contains-Rule expects value or list!");
-            return;
-          }
-          
+          auto needed = as_list(v.getSchema());
           for(auto item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
               if (v.getType("string")->equality(*it, item))
@@ -155,25 +160,27 @@ namespace cerberus {
               auto lookup = v.getDocumentPath(dep.first.template as<std::string>(), 1);
               if(!lookup.IsDefined())
                 v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " required!");
-              if(!v.getType("string")->equality(lookup, dep.second))
-                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value " + dep.second.template as<std::string>());
+
+              auto possible = as_list(dep.second);
+              bool found = false;
+              for (auto val : possible)
+                if(v.getType("string")->equality(lookup, val))
+                  found = true;
+
+              if(!found)
+              {
+                std::string options;
+                for(auto o: possible)
+                  options = options + o.template as<std::string>() + ", ";
+                v.raiseError("dependencies-Rule violated: " + dep.first.template as<std::string>() + " requires value out of [" + options + "]");
+              }
             }
             return;
           }
           
-          YAML::Node deplist;
-          if(v.getSchema().IsScalar())
-            deplist[0] = v.getSchema();
-          else if(v.getSchema().IsSequence())
-            deplist = v.getSchema();
-          else
-          {
-            v.raiseError("dependencies rule with unknown data");
-            return;
-          }
-
+          auto deplist = as_list(v.getSchema());
           for(auto dep: deplist)
-            if(!v.getDocumentPath(dep.as<std::string>(), 1).IsDefined())
+            if(!v.getDocumentPath(dep.template as<std::string>(), 1).IsDefined())
               v.raiseError("dependencies-Rule violated: " + dep.template as<std::string>() + " required!");
         }
       );
@@ -200,7 +207,10 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "excludes: {}"
+          "excludes:     \n"
+          "  type:       \n"
+          "    - string  \n"
+          "    - list    \n"
         ),
         [](auto& v)
         {
@@ -208,19 +218,9 @@ namespace cerberus {
           if(!v.getDocument().IsDefined())
             return;
 
-          YAML::Node exclist;
-          if(v.getSchema().IsScalar())
-            exclist[0] = v.getSchema();
-          else if(v.getSchema().IsSequence())
-            exclist = v.getSchema();
-          else
-          {
-            v.raiseError("excludes rule called with unknown data");
-            return;
-          }
-
+          auto exclist = as_list(v.getSchema());
           for(auto exc: exclist)
-            if(v.getDocumentPath(exc.as<std::string>(), 1).IsDefined())
+            if(v.getDocumentPath(exc.template as<std::string>(), 1).IsDefined())
               v.raiseError("excludes-Rule violated: " + exc.template as<std::string>() + " is not allowed!");
         }
       );
@@ -341,22 +341,21 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "maxlength:\n"
+          "maxlength:      \n"
           "  type: integer \n"
-          "  min: 1"
+          "  min: 0        \n"
+          "  dependencies: \n"
+          "    type:       \n"
+          "      - list    \n"
+          "      - dict    \n"
         ),
         [](auto& v)
         {
-          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError("Maxlength-Rule applied to non-iterable data container!");
-          else
-          {
-            unsigned int count = 0;
-            for(auto item: v.getDocument())
-              ++count;
-            if(count > v.getSchema().template as<int>())
-              v.raiseError("Maxlength-Rule violated!");
-          }
+          unsigned int count = 0;
+          for(auto item: v.getDocument())
+            ++count;
+          if(count > v.getSchema().template as<int>())
+            v.raiseError("Maxlength-Rule violated!");
         }
       );
     }
@@ -366,22 +365,21 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "minlength:\n"
+          "minlength:      \n"
           "  type: integer \n"
-          "  min: 0"
+          "  min: 0        \n"
+          "  dependencies: \n"
+          "    type:       \n"
+          "      - list    \n"
+          "      - dict    \n"
         ),
         [](auto& v)
         {
-          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError("Minlength-Rule applied to non-iterable data container!");
-          else
-          {
-            unsigned int count = 0;
-            for(auto item: v.getDocument())
-              ++count;
-            if(count < v.getSchema().template as<int>())
-              v.raiseError("Minlength-Rule violated!");
-          }
+          unsigned int count = 0;
+          for(auto item: v.getDocument())
+            ++count;
+          if(count < v.getSchema().template as<int>())
+            v.raiseError("Minlength-Rule violated!");
         }
       );
     }
@@ -586,28 +584,35 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "type: \n"
-          "  type: string"
+          "type:         \n"
+          "  type:       \n"
+          "    - string  \n"
+          "    - list    \n"
         ),
         [](auto& v)
         {
           if((v.getDocument().IsNull()) || (!v.getDocument().IsDefined()))
             return;
 
-          auto type = v.getSchema().template as<std::string>();
-          if (type == "list")
+          auto allowed_types = as_list(v.getSchema());
+          // If a list is permitted and a list is given - we are good!
+          if((std::find_if(allowed_types.begin(), allowed_types.end(), [](auto t){ return t.template as<std::string>() == "list"; }) != allowed_types.end()) && (v.getDocument().IsSequence()))
+            return;
+
+          // If a dict is permitted and a dict is given - we are good!
+          if((std::find_if(allowed_types.begin(), allowed_types.end(), [](auto t){ return t.template as<std::string>() == "dict"; }) != allowed_types.end()) && (v.getDocument().IsMap()))
+            return;
+
+          bool found_type = false;
+          for(auto t : allowed_types)
           {
-            if(!v.getDocument().IsSequence())
-              v.raiseError("Expecting a list");
-            }
-          else if(type == "dict")
-          {
-            if(!v.getDocument().IsMap())
-              v.raiseError("Expecting a map");
+            std::string tstr = t.template as<std::string>();
+            if((tstr != "list") && (tstr != "dict") && (v.getType(tstr)->is_convertible(v.getDocument())))
+              found_type = true;
           }
-          else
-            if (!v.getType(type)->is_convertible(v.getDocument()))
-              v.raiseError("Type-Rule violated");
+
+          if (!found_type)
+            v.raiseError("Type-Rule violated");
         },
         RulePriority::TYPECHECKING
       );

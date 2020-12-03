@@ -107,6 +107,28 @@ dependencies-dict:
   failure:
     - field1: bar
       field2: foo
+    - field2: foo
+dependencies-dict-with-list:
+  schema:
+    field1:
+      required: false
+    field2:
+      required: false
+      dependencies:
+        field1:
+          - foo
+          - bar
+  success:
+    - {}
+    - field1: abc
+    - field1: foo
+      field2: abc
+    - field1: bar
+      field2: abc
+  failure:
+    - field1: other
+      field2: abc
+    - field2: abc
 dependencies-list:
   schema:
     field1:
@@ -182,16 +204,26 @@ excludes-list:
   schema:
     field:
       required: false
-      excludes: other
+      excludes:
+        - other
+        - third
     other:
+      required: false
+    third:
       required: false
   success:
     - {}
     - field: foo
     - other: bar
+      third: 3
   failure:
     - field: foo
       other: bar
+    - field: foo
+      third: bar
+    - field: foo
+      other: bar
+      third: bar
 excludes-simple:
   schema:
     field:
@@ -255,8 +287,19 @@ min-simple:
       min: 1000
   success:
     - uuid: 1042
+    - {}
   failure:
     - uuid: 950
+max-simple:
+  schema:
+    uuid:
+      type: integer
+      max: 1000
+  success:
+    - uuid: 950
+    - {}
+  failure:
+    - uuid: 1042
 minlength-dict-simple:
   schema:
     field:
@@ -283,6 +326,32 @@ minlength-list-simple:
   failure:
     - field:
       - 2
+maxlength-dict-simple:
+  schema:
+    field:
+      type: dict
+      maxlength: 1
+  success:
+    - field:
+        foo: 42
+  failure:
+    - field:
+        foo: 42
+        bar: 42
+maxlength-list-simple:
+  schema:
+    field:
+      type: list
+      maxlength: 1
+      schema:
+        type: integer
+  success:
+    - field:
+      - 2
+  failure:
+    - field:
+      - 2
+      - 4
 nonschema-field:
   # Unless requested, fields in the schema should not be required
   schema:
@@ -316,6 +385,16 @@ purge_unknown-simple:
   success:
     - field: foo
       other: bar
+purge_unknown-nested:
+  schema:
+    field:
+      type: dict
+      purge_unknown: true
+  success:
+    - field:
+        foo: bar
+    - field: {}
+    - {}
 regex-simple:
   schema:
     email:
@@ -415,6 +494,29 @@ schema-list-simple:
     - field:
       - foo
       - bar
+type-simple:
+  schema:
+    field:
+      type: integer
+  success:
+    - field: 42
+    - {}
+  failure:
+    - field: true
+    - field: abc
+    - field:
+        foo: 42
+type-list:
+  schema:
+    field:
+      type:
+        - integer
+        - float
+  success:
+    - field: 42
+    - field: 3.14
+  failure:
+    - field: abc
 valuesrules-simple:
   schema:
     roles:
