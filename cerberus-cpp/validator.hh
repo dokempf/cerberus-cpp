@@ -345,8 +345,8 @@ namespace cerberus {
       {
         for(auto error: errors)
         {
-          stream << "Error validating data field " << error.path << std::endl;
-          stream << "Message: " << error.message << std::endl;
+          stream << "Error validating data field " << error.path << "\n";
+          stream << "Message: " << error.message << "\n";
         }
       }
 

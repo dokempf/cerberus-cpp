@@ -1,8 +1,0 @@
-# Unless requested, fields in the schema should not be required
-schema:
-  foo:
-    type: string
-  bar:
-    type: string
-success:
-  - foo: bar

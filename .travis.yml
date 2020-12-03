@@ -1,5 +1,8 @@
 language: cpp
 
+git:
+  submodules: true
+
 addons:
   apt:
     packages:
