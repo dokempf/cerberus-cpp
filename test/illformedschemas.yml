@@ -11,3 +11,7 @@ minlength-on-scalar:
   foo:
     type: integer
     minlength: 1
+maxlength-on-scalar:
+  foo:
+    type: integer
+    minlength: 1

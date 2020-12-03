@@ -350,22 +350,21 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "maxlength:\n"
+          "maxlength:      \n"
           "  type: integer \n"
-          "  min: 1"
+          "  min: 0        \n"
+          "  dependencies: \n"
+          "    type:       \n"
+          "      - list    \n"
+          "      - dict    \n"
         ),
         [](auto& v)
         {
-          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError("Maxlength-Rule applied to non-iterable data container!");
-          else
-          {
-            unsigned int count = 0;
-            for(auto item: v.getDocument())
-              ++count;
-            if(count > v.getSchema().template as<int>())
-              v.raiseError("Maxlength-Rule violated!");
-          }
+          unsigned int count = 0;
+          for(auto item: v.getDocument())
+            ++count;
+          if(count > v.getSchema().template as<int>())
+            v.raiseError("Maxlength-Rule violated!");
         }
       );
     }
@@ -375,22 +374,21 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "minlength:\n"
+          "minlength:      \n"
           "  type: integer \n"
-          "  min: 0"
+          "  min: 0        \n"
+          "  dependencies: \n"
+          "    type:       \n"
+          "      - list    \n"
+          "      - dict    \n"
         ),
         [](auto& v)
         {
-          if(!((v.getDocument().IsSequence()) || (v.getDocument().IsMap())))
-            v.raiseError("Minlength-Rule applied to non-iterable data container!");
-          else
-          {
-            unsigned int count = 0;
-            for(auto item: v.getDocument())
-              ++count;
-            if(count < v.getSchema().template as<int>())
-              v.raiseError("Minlength-Rule violated!");
-          }
+          unsigned int count = 0;
+          for(auto item: v.getDocument())
+            ++count;
+          if(count < v.getSchema().template as<int>())
+            v.raiseError("Minlength-Rule violated!");
         }
       );
     }

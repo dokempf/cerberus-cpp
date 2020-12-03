@@ -336,7 +336,7 @@ maxlength-dict-simple:
     - field:
         foo: 42
         bar: 42
-minlength-list-simple:
+maxlength-list-simple:
   schema:
     field:
       type: list
