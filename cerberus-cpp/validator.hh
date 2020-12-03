@@ -206,8 +206,7 @@ namespace cerberus {
      *
      * This also accessible through the overloaded stream @c operator<<.
      */
-    template<typename Stream>
-    void printErrors(Stream& stream) const
+    void printErrors(std::ostream& stream) const
     {
       return state.printErrors(stream);
     }
@@ -575,8 +574,7 @@ namespace cerberus {
   };
 
   //! overload stream operator for easy printing of errors
-  template<typename Stream>
-  Stream& operator<<(Stream& stream, const Validator& v)
+  std::ostream& operator<<(std::ostream& stream, const Validator& v)
   {
     v.printErrors(stream);
     return stream;
