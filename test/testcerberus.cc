@@ -4,7 +4,7 @@
 #include<cerberus-cpp/validator.hh>
 #include<yaml-cpp/yaml.h>
 
-static YAML::Node testdata = YAML::LoadFile("testdata.yml");
+static const YAML::Node testdata = YAML::LoadFile("testdata.yml");
 
 // For now this is only a different class - nothing fancy
 class CustomValidator
