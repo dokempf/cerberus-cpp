@@ -316,6 +316,16 @@ purge_unknown-simple:
   success:
     - field: foo
       other: bar
+purge_unknown-nested:
+  schema:
+    field:
+      type: dict
+      purge_unknown: true
+  success:
+    - field:
+        foo: bar
+    - field: {}
+    - {}
 regex-simple:
   schema:
     email:
