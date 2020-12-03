@@ -268,6 +268,15 @@ min-simple:
     - uuid: 1042
   failure:
     - uuid: 950
+max-simple:
+  schema:
+    uuid:
+      type: integer
+      max: 1000
+  success:
+    - uuid: 950
+  failure:
+    - uuid: 1042
 minlength-dict-simple:
   schema:
     field:
@@ -294,6 +303,32 @@ minlength-list-simple:
   failure:
     - field:
       - 2
+maxlength-dict-simple:
+  schema:
+    field:
+      type: dict
+      maxlength: 1
+  success:
+    - field:
+        foo: 42
+  failure:
+    - field:
+        foo: 42
+        bar: 42
+minlength-list-simple:
+  schema:
+    field:
+      type: list
+      maxlength: 1
+      schema:
+        type: integer
+  success:
+    - field:
+      - 2
+  failure:
+    - field:
+      - 2
+      - 4
 nonschema-field:
   # Unless requested, fields in the schema should not be required
   schema:
