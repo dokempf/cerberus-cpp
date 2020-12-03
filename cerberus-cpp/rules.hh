@@ -586,28 +586,38 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "type: \n"
-          "  type: string"
+          "type:         \n"
+          "  type:       \n"
+          "    - string  \n"
+          "    - list    \n"
         ),
         [](auto& v)
         {
           if((v.getDocument().IsNull()) || (!v.getDocument().IsDefined()))
             return;
 
-          auto type = v.getSchema().template as<std::string>();
-          if (type == "list")
-          {
-            if(!v.getDocument().IsSequence())
-              v.raiseError("Expecting a list");
-            }
-          else if(type == "dict")
-          {
-            if(!v.getDocument().IsMap())
-              v.raiseError("Expecting a map");
-          }
-          else
-            if (!v.getType(type)->is_convertible(v.getDocument()))
-              v.raiseError("Type-Rule violated");
+          std::vector<std::string> allowed_types;
+          if(v.getSchema().IsScalar())
+            allowed_types.push_back(v.getSchema().template as<std::string>());
+          if(v.getSchema().IsSequence())
+            for(auto t : v.getSchema())
+              allowed_types.push_back(t.template as<std::string>());
+
+          // If a list is permitted and a list is given - we are good!
+          if((std::find(allowed_types.begin(), allowed_types.end(), "list") != allowed_types.end()) && (v.getDocument().IsSequence()))
+            return;
+
+          // If a dict is permitted and a dict is given - we are good!
+          if((std::find(allowed_types.begin(), allowed_types.end(), "dict") != allowed_types.end()) && (v.getDocument().IsMap()))
+            return;
+
+          bool found_type = false;
+          for(auto t : allowed_types)
+            if((t != "list") && (t != "dict") && (v.getType(t)->is_convertible(v.getDocument())))
+              found_type = true;
+
+          if (!found_type)
+            v.raiseError("Type-Rule violated");
         },
         RulePriority::TYPECHECKING
       );

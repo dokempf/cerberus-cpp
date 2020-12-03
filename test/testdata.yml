@@ -425,6 +425,29 @@ schema-list-simple:
     - field:
       - foo
       - bar
+type-simple:
+  schema:
+    field:
+      type: integer
+  success:
+    - field: 42
+    - {}
+  failure:
+    - field: true
+    - field: abc
+    - field:
+        foo: 42
+type-list:
+  schema:
+    field:
+      type:
+        - integer
+        - float
+  success:
+    - field: 42
+    - field: 3.14
+  failure:
+    - field: abc
 valuesrules-simple:
   schema:
     roles:
