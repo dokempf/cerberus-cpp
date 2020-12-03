@@ -91,22 +91,20 @@ namespace cerberus {
     {
       validator.registerRule(
         YAML::Load(
-          "contains: {}"
+          "contains:   \n"
+          "  type:     \n"
+          "    - string\n"
+          "    - list  \n"
         ),
         [](auto& v)
         {
           std::vector<YAML::Node> needed;
           if(v.getSchema().IsScalar())
             needed.push_back(v.getSchema());
-          else if(v.getSchema().IsSequence())
+          if(v.getSchema().IsSequence())
             for(auto item: v.getSchema())
               needed.push_back(item);
-          else
-          {
-            v.raiseError("Contains-Rule expects value or list!");
-            return;
-          }
-          
+
           for(auto item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
               if (v.getType("string")->equality(*it, item))

@@ -2,3 +2,8 @@ unknown-rule:
   foo:
     type: integer
     foobar: true
+contains-value-or-list:
+  foo:
+    type: list
+    contains:
+      foo: 42
