@@ -13,7 +13,7 @@ class CustomValidator
 
 
 TEMPLATE_TEST_CASE("Performing standard validation", "[validate]", cerberus::Validator, CustomValidator) {
-  cerberus::Validator validator;
+  TestType validator;
   for(auto testcase : testdata)
   {
     auto name = testcase.first;
