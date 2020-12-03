@@ -7,3 +7,7 @@ contains-value-or-list:
     type: list
     contains:
       foo: 42
+minlength-on-scalar:
+  foo:
+    type: integer
+    minlength: 1
