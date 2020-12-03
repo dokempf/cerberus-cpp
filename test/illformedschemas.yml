@@ -1,0 +1,4 @@
+unknown-rule:
+  foo:
+    type: integer
+    foobar: true
