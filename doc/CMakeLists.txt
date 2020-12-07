@@ -5,7 +5,7 @@ find_package(Doxygen)
 if(DOXYGEN_FOUND)
   set(DOXYGEN_GENERATE_XML YES)
   doxygen_add_docs(doxygen
-    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/cerberus-cpp
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT Building doxygen documentation
   )
