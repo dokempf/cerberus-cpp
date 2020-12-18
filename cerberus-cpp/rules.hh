@@ -291,7 +291,9 @@ namespace cerberus {
     void meta_rule(Validator& validator)
     {
       validator.registerRule(
-        YAML::Load("meta: {}"),
+        YAML::Load("meta:                 \n"
+                   "  type: dict          \n"
+                   "  allow_unknown: true \n"),
         [](auto&){
           // The meta field may carry *any* data, no validation is performed.
         }
@@ -658,6 +660,7 @@ namespace cerberus {
     impl::items_rule(v);
     impl::keysrules_rule(v);
     impl::max_rule(v);
+    impl::meta_rule(v);
     impl::min_rule(v);
     impl::maxlength_rule(v);
     impl::minlength_rule(v);
