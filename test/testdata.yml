@@ -352,6 +352,14 @@ maxlength-list-simple:
     - field:
       - 2
       - 4
+meta-simple:
+  schema:
+    field:
+      type: string
+      meta:
+        name: Field
+  success:
+    - field: foo
 nonschema-field:
   # Unless requested, fields in the schema should not be required
   schema:
