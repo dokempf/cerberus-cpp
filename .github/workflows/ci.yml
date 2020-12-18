@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  # We run CI on pushes to the main branch
+  push:
+    branches:
+      - master
+  # and on all pull requests to the main branch
+  pull_request:
+    branches:
+      - master
+  # as well as upon manual triggers through the 'Actions' tab of the Github UI
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Testing on ${{matrix.os}}
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Install dependencies
+      run: |
+        sudo apt install -y libyaml-cpp-dev
+
+    - name: make build directory
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: configure cmake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug
+
+    - name: build
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build .
+
+    - name: run tests
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: ctest
+
+
+  coverage-test:
+    name: Coverage Testing
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Install dependencies
+      run: |
+        sudo apt install -y lcov libyaml-cpp-dev
+
+    - name: make build directory
+      run: cmake -E make_directory ${{runner.workspace}}/build
+
+    - name: configure cmake
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_CXX_FLAGS="--coverage"
+
+    - name: build
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: cmake --build .
+
+    - name: run tests
+      shell: bash
+      working-directory: ${{runner.workspace}}/build
+      run: ctest
+
+    - name: collect coverage report
+      shell: bash
+      working-directory: ${{runner.workspace}}
+      run: |
+        lcov --directory ./build/test/CMakeFiles/testcerberus.dir --capture --output-file coverage.info
+        bash <(curl --connect-timeout 10 --retry 5 -s https://codecov.io/bash) -f coverage.info || echo "Codecov did not collect coverage reports"
+
