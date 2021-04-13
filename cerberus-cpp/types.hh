@@ -15,9 +15,9 @@ namespace cerberus {
    */
   struct TypeItemBase
   {
-    virtual bool is_convertible(const YAML::Node&) const = 0;
-    virtual bool equality(const YAML::Node&, const YAML::Node&) const = 0;
-    virtual bool less(const YAML::Node&, const YAML::Node&) const = 0;
+    virtual bool is_convertible(YAML::Node) const = 0;
+    virtual bool equality(YAML::Node, YAML::Node) const = 0;
+    virtual bool less(YAML::Node, YAML::Node) const = 0;
   };
 
   /** @brief An implementation of the @c TypeItemBase interface that wraps a C++ type
@@ -32,13 +32,13 @@ namespace cerberus {
   struct TypeItem
     : TypeItemBase
   {
-    bool is_convertible(const YAML::Node& node) const override
+    bool is_convertible(YAML::Node node) const override
     {
       T val;
       return YAML::convert<T>::decode(node, val);
     }
 
-    bool equality(const YAML::Node& op1, const YAML::Node& op2) const override
+    bool equality(YAML::Node op1, YAML::Node op2) const override
     {
       T cop1;
       T cop2;
@@ -47,7 +47,7 @@ namespace cerberus {
       return cop1 == cop2;
     }
 
-    bool less(const YAML::Node& op1, const YAML::Node& op2) const override
+    bool less(YAML::Node op1, YAML::Node op2) const override
     {
       T cop1;
       T cop2;

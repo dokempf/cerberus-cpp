@@ -63,7 +63,7 @@ namespace cerberus {
      * @param node The new YAML document. The stack will hold a deep copy
      *             of this document.
      */
-    void reset(const YAML::Node& node)
+    void reset(YAML::Node node)
     {
       path.clear();
       this->clear();
@@ -106,7 +106,7 @@ namespace cerberus {
      *
      * @param level The stack item index that we are interested in.
      */
-    YAML::Node& get(std::size_t level = 0)
+    YAML::Node get(std::size_t level = 0)
     {
       return *(this->rbegin() + level);
     }
@@ -118,7 +118,7 @@ namespace cerberus {
      *
      * @param level The stack item index that we are interested in.
      */
-    const YAML::Node& get(std::size_t level = 0) const
+    const YAML::Node get(std::size_t level = 0) const
     {
       return *(this->rbegin() + level);
     }
@@ -137,7 +137,7 @@ namespace cerberus {
     }
 
     //! Replaces the back node with a new one
-    void replaceBack(const YAML::Node& node)
+    void replaceBack(YAML::Node node)
     {
       this->pop_back();
       this->push_back(node);

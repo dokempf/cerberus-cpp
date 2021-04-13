@@ -33,7 +33,7 @@ namespace cerberus {
   namespace impl {
 
     //! A small helper that allows unified treatment of scalars and lists
-    std::vector<YAML::Node> as_list(const YAML::Node& node)
+    std::vector<YAML::Node> as_list(YAML::Node node)
     {
       std::vector<YAML::Node> result;
       if(node.IsScalar())
@@ -461,15 +461,6 @@ namespace cerberus {
         ),
         [](auto& v)
         {
-          auto dict = v.getDocument(1);
-          auto doc = v.getDocument(0);
-
-          YAML::Node newdict;
-          for(auto item : dict)
-            if(item.first.template as<std::string>() != v.getCurrentField())
-              newdict[item.first] = item.second;
-          v.getDocument(1).reset(newdict);
-
           v.popCurrentField();
           v.pushCurrentField(v.getSchema().template as<std::string>());
         },
