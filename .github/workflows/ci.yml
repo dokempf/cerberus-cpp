@@ -17,6 +17,10 @@ jobs:
     name: Testing on ${{matrix.os}}
     runs-on: ubuntu-20.04
 
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -32,7 +36,7 @@ jobs:
     - name: configure cmake
       shell: bash
       working-directory: ${{runner.workspace}}/build
-      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Debug
+      run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
 
     - name: build
       shell: bash
