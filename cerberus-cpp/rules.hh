@@ -33,7 +33,7 @@ namespace cerberus {
   namespace impl {
 
     //! A small helper that allows unified treatment of scalars and lists
-    std::vector<YAML::Node> as_list(YAML::Node node)
+    std::vector<YAML::Node> as_list(const YAML::Node& node)
     {
       std::vector<YAML::Node> result;
       if(node.IsScalar())

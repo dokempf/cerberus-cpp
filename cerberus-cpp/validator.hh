@@ -31,7 +31,7 @@ namespace cerberus {
      * @param schema The schema that this validator should be
      *               validating against.
      */
-    explicit Validator(YAML::Node schema)
+    explicit Validator(const YAML::Node& schema)
       : schema_(schema)
       , state(*this, YAML::Node())
     {
@@ -89,7 +89,7 @@ namespace cerberus {
      * @param name The name for the registered schema
      * @param schema The YAML::Node that represents the schema
      */
-    void registerSchema(const std::string& name, YAML::Node schema)
+    void registerSchema(const std::string& name, const YAML::Node& schema)
     {
       schema_registry[name] = YAML::Clone(schema);
     }
@@ -143,7 +143,7 @@ namespace cerberus {
      * @param document The document to validate
      * @returns Whether or not the validation process was successful
      */
-    bool validate(YAML::Node document)
+    bool validate(const YAML::Node& document)
     {
       return validate(document, schema_);
     }
@@ -156,7 +156,7 @@ namespace cerberus {
      * @param schema The schema to validate against
      * @returns Whether or not the validation process was successful
      */
-    bool validate(YAML::Node document, YAML::Node schema)
+    bool validate(const YAML::Node& document, const YAML::Node& schema)
     {
       YAML::Node validated_schema;
       if(validate_schema)
@@ -186,7 +186,7 @@ namespace cerberus {
      * @param schema The schema to validate against
      * @returns Whether or not the validation process was successful
      */
-    bool validate(YAML::Node document, const std::string& schema)
+    bool validate(const YAML::Node& document, const std::string& schema)
     {
       return validate(document, schema_registry[schema]);
     }
@@ -228,7 +228,7 @@ namespace cerberus {
        * @param validator the Validator instance
        * @param document The document to validate
        */
-      ValidationRuleInterface(Validator& validator, YAML::Node document)
+      ValidationRuleInterface(Validator& validator, const YAML::Node& document)
         : validator(validator)
       {
         document_stack.reset(YAML::Clone(document));
@@ -271,7 +271,7 @@ namespace cerberus {
                                     RulePriority::LAST })
         {
           // Implement the require all policy of the validator
-          if((priority == RulePriority::NORMALIZATION) && (require_all))
+          if((priority == RulePriority::NORMALIZATION) && require_all)
             schema["required"] = "true";
 
           for(auto ruleval : schema)
@@ -299,7 +299,7 @@ namespace cerberus {
        *
        * @param schema Will go away in favor of the schema already being pushed on the stack
        */
-      bool validateDict(YAML::Node schema)
+      bool validateDict(const YAML::Node& schema)
       {
         // Store the schema in validation state to have it accessible in rules
         schema_stack.push_back(schema);
@@ -309,7 +309,7 @@ namespace cerberus {
         for(auto fieldrules : schema)
         {
           pushCurrentField(fieldrules.first.as<std::string>());
-          auto rules = fieldrules.second;
+          const auto& rules = fieldrules.second;
           document_stack.pushDictItem(getCurrentField());
           std::string oldCurrentField = getCurrentField();
           validateItem(rules);
@@ -323,7 +323,7 @@ namespace cerberus {
           popCurrentField();
         }
 
-        if((purge_unknown) && (found.size() != getDocument().size()))
+        if(purge_unknown && (found.size() != getDocument().size()))
         {
           YAML::Node newnode;
           for(auto item : getDocument())
@@ -408,7 +408,7 @@ namespace cerberus {
       YAML::Node getSchema(std::size_t level = 0, bool is_full_schema = false)
       {
         YAML::Node schema = schema_stack.get(level);
-        if((is_full_schema) && (schema.IsScalar()))
+        if(is_full_schema && (schema.IsScalar()))
           return validator.schema_registry[schema.as<std::string>()];
         else
           return schema;
@@ -508,7 +508,7 @@ namespace cerberus {
       }
 
       //! Reset the internal state to a new root document
-      void reset(YAML::Node document)
+      void reset(const YAML::Node& document)
       {
         errors.clear();
         document_stack.reset(YAML::Clone(document));
@@ -569,8 +569,8 @@ namespace cerberus {
     ValidationRuleInterface state;
 
     std::map<std::pair<RulePriority, std::string>, std::function<void(ValidationRuleInterface&)>> rulemapping;
-    std::map<std::string, std::shared_ptr<TypeItemBase>> typesmapping;
-    std::map<std::string, YAML::Node> schema_registry;
+    std::map<std::string, std::shared_ptr<TypeItemBase>, std::less<>> typesmapping;
+    std::map<std::string, YAML::Node, std::less<>> schema_registry;
 
     // The schema that is used to validate user provided schemas.
     // This is update with snippets as rules are registered
