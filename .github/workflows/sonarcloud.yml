@@ -43,7 +43,7 @@ jobs:
           ctest
           mkdir gcov
           cd gcov
-          gcov -p ../test/CMakeFiles/testcerberus.dir/*.cpp.gcno > /dev/null
+          gcov -p ../test/CMakeFiles/testcerberus.dir/*.cc.gcno > /dev/null
           cd ../..
           $HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux/bin/sonar-scanner
         env:
