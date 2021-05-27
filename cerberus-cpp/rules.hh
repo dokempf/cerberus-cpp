@@ -89,7 +89,7 @@ namespace cerberus {
           // Extract type information from the larger schema
           auto type = v.getType(1);
           bool found = false;
-          for(auto item: v.getSchema())
+          for(const auto& item: v.getSchema())
             if (type->equality(item, v.getDocument()))
               found = true;
           
@@ -112,7 +112,7 @@ namespace cerberus {
         [](auto& v)
         {
           auto needed = as_list(v.getSchema());
-          for(auto item: v.getDocument())
+          for(const auto& item: v.getDocument())
             for(auto it = needed.begin(); it != needed.end();)
               if (v.getType("string")->equality(*it, item))
                 it = needed.erase(it);
@@ -236,7 +236,7 @@ namespace cerberus {
         ),
         [](auto& v)
         {
-          for(auto item: v.getSchema())
+          for(const auto& item: v.getSchema())
             if (v.getType(1)->equality(item, v.getDocument()))
               v.raiseError("Forbidden-Rule violated: " + item.template as<std::string>());
         }
