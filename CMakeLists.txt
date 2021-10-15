@@ -5,9 +5,6 @@ cmake_minimum_required(VERSION 3.11)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_subdirectory(ext/Catch2)
-include(CTest)
-
 # When building documentation from readthedocs.io, we need to
 # run CMake, but we do not need to build C++ code, so we should
 # skip any required dependencies.
@@ -31,9 +28,15 @@ target_link_libraries(cerberus-cpp INTERFACE yaml-cpp)
 # Add an alias target for use if this project is included as a subproject in another project
 add_library(cerberus-cpp::cerberus-cpp ALIAS cerberus-cpp)
 
-# Documentation and testing subdirectories
+# Add documentation building
 add_subdirectory(doc)
-add_subdirectory(test)
+
+# Add the testing subdirectories
+if(EXISTS ${CMAKE_SOURCE_DIR}/ext/Catch2/CMakeLists.txt)
+  include(CTest)
+  add_subdirectory(ext/Catch2)
+  add_subdirectory(test)
+endif()
 
 # Installation rules
 include(GNUInstallDirs)
