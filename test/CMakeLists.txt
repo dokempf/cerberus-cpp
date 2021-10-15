@@ -1,7 +1,6 @@
 if(BUILD_TESTING)
   add_executable(testcerberus testcerberus.cc)
-  target_link_libraries(testcerberus yaml-cpp Catch2::Catch2)
-  target_include_directories(testcerberus PUBLIC ${CMAKE_SOURCE_DIR})
+  target_link_libraries(testcerberus PUBLIC cerberus-cpp Catch2::Catch2)
   include(../ext/Catch2/contrib/Catch.cmake)
   catch_discover_tests(testcerberus)
 endif()
