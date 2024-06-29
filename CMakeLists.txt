@@ -31,7 +31,7 @@ add_library(cerberus-cpp INTERFACE)
 target_include_directories(
   cerberus-cpp
   INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_link_libraries(cerberus-cpp INTERFACE yaml-cpp)
@@ -43,7 +43,7 @@ add_library(cerberus-cpp::cerberus-cpp ALIAS cerberus-cpp)
 add_subdirectory(doc)
 
 # Add the testing subdirectories
-if(EXISTS ${CMAKE_SOURCE_DIR}/ext/Catch2/CMakeLists.txt)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/ext/Catch2/CMakeLists.txt)
   include(CTest)
   add_subdirectory(ext/Catch2)
   add_subdirectory(test)
