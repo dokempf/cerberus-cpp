@@ -22,7 +22,7 @@ if(DOCS_ONLY)
   set(REQUIRED_STRING "")
 endif()
 
-if(NOT ${CERBERUS_SKIP_YAML_CPP_PACKAGE_SEARCH})
+if(${CERBERUS_CPP_FIND_YAML_CPP})
   find_package(yaml-cpp 0.6 ${REQUIRED_STRING})
 endif()
 
