@@ -1,6 +1,5 @@
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/dokempf/cerberus-cpp/ci.yml?branch=main)](https://github.com/dokempf/cerberus-cpp/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/cerberus-cpp/badge/?version=latest)](https://cerberus-cpp.readthedocs.io/en/latest/?badge=latest)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=dokempf_cerberus-cpp&metric=alert_status)](https://sonarcloud.io/dashboard?id=dokempf_cerberus-cpp)
 [![codecov](https://codecov.io/gh/dokempf/cerberus-cpp/branch/main/graph/badge.svg?token=OMP0HYTKD6)](https://codecov.io/gh/dokempf/cerberus-cpp)
 
 # What is cerberus-cpp
